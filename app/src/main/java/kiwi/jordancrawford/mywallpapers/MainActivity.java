@@ -2,6 +2,7 @@ package kiwi.jordancrawford.mywallpapers;
 
 import android.app.WallpaperManager;
 import android.content.Intent;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
@@ -12,15 +13,20 @@ import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.ImageView;
 import android.widget.Toast;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 
 public class MainActivity extends AppCompatActivity {
 
-    private int PICK_IMAGE_REQUEST = 1;
-    private int SET_WALLPAPER_REQUEST = 2;
+    private final int PICK_IMAGE_REQUEST = 1;
+    private final int SET_WALLPAPER_REQUEST = 2;
+    private final String INTENT_USED_KEY = "used";
+
+    private ImageView sentImageDisplay;
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -36,13 +42,30 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        Intent intent = getIntent();
+        String intentAction = intent.getAction();
+        sentImageDisplay = (ImageView) findViewById(R.id.sent_image_display);
+
+        if (Intent.ACTION_SEND.equals(intentAction) && !intent.hasExtra(INTENT_USED_KEY)) {
+            // Mark the intent as used.
+            intent.putExtra(INTENT_USED_KEY, true);
+
+            // Check this is an image.
+            if (intent.getType().startsWith("image/")) {
+                Uri imageUri = (Uri) intent.getParcelableExtra(Intent.EXTRA_STREAM);
+
+                // Check this image Uri exists.
+                if (imageUri != null) {
+                    sentImageDisplay.setImageURI(imageUri);
+                }
+            }
+        }
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
