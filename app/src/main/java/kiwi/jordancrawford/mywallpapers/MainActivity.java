@@ -12,6 +12,7 @@ import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Toast;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -19,6 +20,7 @@ import java.io.IOException;
 public class MainActivity extends AppCompatActivity {
 
     private int PICK_IMAGE_REQUEST = 1;
+    private int SET_WALLPAPER_REQUEST = 2;
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -26,7 +28,11 @@ public class MainActivity extends AppCompatActivity {
         if (requestCode == PICK_IMAGE_REQUEST && resultCode == RESULT_OK && data != null && data.getData() != null) {
             Uri uri = data.getData();
             Intent changeWallpaperIntent = WallpaperManager.getInstance(this).getCropAndSetWallpaperIntent(uri);
-            startActivity(changeWallpaperIntent);
+            startActivityForResult(changeWallpaperIntent, SET_WALLPAPER_REQUEST);
+        } else if (requestCode == SET_WALLPAPER_REQUEST) {
+            if (resultCode == RESULT_OK) {
+                Toast.makeText(this, R.string.wallpaper_set, Toast.LENGTH_SHORT).show();
+            }
         }
     }
 
