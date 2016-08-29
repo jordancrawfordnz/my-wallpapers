@@ -2,6 +2,8 @@ package kiwi.jordancrawford.mywallpapers;
 
 import android.app.WallpaperManager;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
@@ -25,6 +27,7 @@ public class MainActivity extends AppCompatActivity {
     private final int PICK_IMAGE_REQUEST = 1;
     private final int SET_WALLPAPER_REQUEST = 2;
     private final String INTENT_USED_KEY = "used";
+    private final double SCALE_MAX_DIMENSION = 512.0;
 
     private ImageView sentImageDisplay;
 
@@ -40,6 +43,30 @@ public class MainActivity extends AppCompatActivity {
                 Toast.makeText(this, R.string.wallpaper_set, Toast.LENGTH_SHORT).show();
             }
         }
+    }
+
+    private int getAdjustedImageDimension(int currentSize, int largestDimension) {
+        return (int) (currentSize * (SCALE_MAX_DIMENSION / largestDimension));
+    }
+
+    private Bitmap getSmallVersion(Bitmap image) {
+        int smallWidth, smallHeight;
+        // Scale the image to its smallest size.
+        if (image.getWidth() > image.getHeight()) {
+            smallWidth = (int) SCALE_MAX_DIMENSION;
+            smallHeight = getAdjustedImageDimension(image.getHeight(),image.getWidth());
+        } else {
+            smallWidth =  getAdjustedImageDimension(image.getWidth(), image.getHeight());
+            smallHeight = (int) SCALE_MAX_DIMENSION;
+        }
+
+        Bitmap scaledImage = Bitmap.createScaledBitmap(image, smallWidth, smallHeight, true);
+        return scaledImage;
+    }
+
+    // Adds the provided image to the database and includes it in the display.
+    private void processSharedIncomingImage(Bitmap image) {
+
     }
 
     @Override
@@ -63,6 +90,16 @@ public class MainActivity extends AppCompatActivity {
                 // Check this image Uri exists.
                 if (imageUri != null) {
                     sentImageDisplay.setImageURI(imageUri);
+
+                    // Try display the content.
+                    try {
+                        Bitmap largeImage = ExifUtil.getCorrectlyOrientedImage(this, imageUri, 3000);
+                        Bitmap smallImage = getSmallVersion(largeImage);
+                        sentImageDisplay.setImageBitmap(smallImage);
+                        Toast.makeText(this, R.string.sent_content_received, Toast.LENGTH_SHORT).show();
+                    } catch (IOException exception) {
+                        Toast.makeText(this, R.string.sent_content_error, Toast.LENGTH_LONG).show();
+                    }
                 }
             }
         }
