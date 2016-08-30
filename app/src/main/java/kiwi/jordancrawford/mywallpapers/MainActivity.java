@@ -25,9 +25,9 @@ public class MainActivity extends AppCompatActivity {
     private final int PICK_IMAGE_REQUEST = 1;
     private final int SET_WALLPAPER_REQUEST = 2;
     private final String INTENT_USED_KEY = "used";
+    public final String WALLPAPER_ADDED_BROADCAST_INTENT = "wallpaper_added_message";
     private ImageView sentImageDisplay;
 
-    public static String WALLPAPER_ADDED_BROADCAST_INTENT = "wallpaper_added_message";
 
     private BroadcastReceiver wallpaperAddedMessageReceiver = new BroadcastReceiver() {
         @Override
@@ -50,14 +50,26 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    private void processIntent(Intent intent) {
+        String intentAction = intent.getAction();
+        if (Intent.ACTION_SEND.equals(intentAction) && !intent.hasExtra(INTENT_USED_KEY)) {
+            // Mark the intent as used.
+            intent.putExtra(INTENT_USED_KEY, true);
+
+            // Check this is an image.
+            if (intent.getType().startsWith("image/")) {
+                Uri imageUri = (Uri) intent.getParcelableExtra(Intent.EXTRA_STREAM);
+                new ProcessSentImage(this).execute(imageUri);
+            }
+        }
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        Intent intent = getIntent();
-        String intentAction = intent.getAction();
         sentImageDisplay = (ImageView) findViewById(R.id.sent_image_display);
 
         // Evil blocking
@@ -93,16 +105,7 @@ public class MainActivity extends AppCompatActivity {
 
         LocalBroadcastManager.getInstance(this).registerReceiver(wallpaperAddedMessageReceiver, new IntentFilter(WALLPAPER_ADDED_BROADCAST_INTENT));
 
-        if (Intent.ACTION_SEND.equals(intentAction) && !intent.hasExtra(INTENT_USED_KEY)) {
-            // Mark the intent as used.
-            intent.putExtra(INTENT_USED_KEY, true);
-
-            // Check this is an image.
-            if (intent.getType().startsWith("image/")) {
-                Uri imageUri = (Uri) intent.getParcelableExtra(Intent.EXTRA_STREAM);
-                new ProcessSentImage(this).execute(imageUri);
-            }
-        }
+        processIntent(getIntent());
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -118,11 +121,17 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+    // Unregister from local async events.
     @Override
     protected void onDestroy() {
         LocalBroadcastManager.getInstance(this).unregisterReceiver(wallpaperAddedMessageReceiver);
         System.out.println("Destory broadcast listener");
         super.onDestroy();
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        processIntent(intent);
     }
 
     // Does all the processing on images sent to the activity. After completion, sents a broadcast to the activity (if it is around) to refresh the list of Wallpapers.
