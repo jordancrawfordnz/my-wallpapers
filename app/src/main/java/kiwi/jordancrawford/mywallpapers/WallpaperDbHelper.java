@@ -22,9 +22,7 @@ public class WallpaperDbHelper extends SQLiteOpenHelper {
     private static final String SQL_CREATE_TABLE_WALLPAPERS =
             "CREATE TABLE " + WallpaperEntry.TABLE_NAME + "("
             + WallpaperEntry._ID + " " + ID_PROPERTIES + ","
-            + WallpaperEntry.COLUMN_NAME_DAYS_AS_WALLPAPER + " " + WallpaperEntry.COLUMN_NAME_DAYS_AS_WALLPAPER_TYPE + ","
-            + WallpaperEntry.COLUMN_NAME_LARGE_PICTURE + " " + WallpaperEntry.COLUMN_NAME_LARGE_PICTURE_TYPE + ","
-            + WallpaperEntry.COLUMN_NAME_SMALL_PICTURE + " " + WallpaperEntry.COLUMN_NAME_SMALL_PICTURE_TYPE + ")";
+            + WallpaperEntry.COLUMN_NAME_DAYS_AS_WALLPAPER + " " + WallpaperEntry.COLUMN_NAME_DAYS_AS_WALLPAPER_TYPE + ")";
     private static final String SQL_DROP_TABLE_WALLPAPERS =
             "DROP TABLE IF EXISTS " + WallpaperEntry.TABLE_NAME;
 
@@ -72,6 +70,7 @@ public class WallpaperDbHelper extends SQLiteOpenHelper {
         onCreate(db);
     }
 
+    // TODO: Fill this in!
 //    public Wallpaper getConfig() {
 //        // Will return an empty Config if none exists.
 //    }
@@ -85,8 +84,6 @@ public class WallpaperDbHelper extends SQLiteOpenHelper {
         String[] projection = {
                 WallpaperEntry._ID,
                 WallpaperEntry.COLUMN_NAME_DAYS_AS_WALLPAPER,
-                WallpaperEntry.COLUMN_NAME_SMALL_PICTURE,
-                WallpaperEntry.COLUMN_NAME_LARGE_PICTURE
         };
         Cursor queryResult = getReadableDatabase().query(
                 WallpaperEntry.TABLE_NAME,
@@ -102,8 +99,6 @@ public class WallpaperDbHelper extends SQLiteOpenHelper {
                 Wallpaper currentWallpaper = new Wallpaper();
                 currentWallpaper.setId(queryResult.getInt(0));
                 currentWallpaper.setDaysAsWallpaper(queryResult.getInt(1));
-                currentWallpaper.setSmallPictureFilename(queryResult.getString(2));
-                currentWallpaper.setLargePictureFilename(queryResult.getString(3));
                 wallpaperResult.add(currentWallpaper);
             } while (queryResult.moveToNext());
         }
@@ -114,8 +109,6 @@ public class WallpaperDbHelper extends SQLiteOpenHelper {
     private ContentValues getWallpaperFields(Wallpaper wallpaper) {
         ContentValues values = new ContentValues();
         values.put(WallpaperEntry.COLUMN_NAME_DAYS_AS_WALLPAPER, wallpaper.getDaysAsWallpaper());
-        values.put(WallpaperEntry.COLUMN_NAME_SMALL_PICTURE, wallpaper.getSmallPictureFilename());
-        values.put(WallpaperEntry.COLUMN_NAME_LARGE_PICTURE, wallpaper.getLargePictureFilename());
         return values;
     }
 

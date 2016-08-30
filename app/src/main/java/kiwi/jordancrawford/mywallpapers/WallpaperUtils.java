@@ -52,25 +52,48 @@ public class WallpaperUtils {
         return bitmapsToReturn;
     }
 
-    private static void writeImageToFile(Bitmap toWrite, File directory, String fileName) throws IOException {
-        File imageFile = new File(directory, fileName);
+    // Gets the directory that holds the small images.
+    private static File getSmallImagesDir(Context context) {
+        File smallImagesDir = context.getDir(SMALL_IMAGES_DIR, Context.MODE_PRIVATE);
+        if (!smallImagesDir.exists())
+            smallImagesDir.mkdirs();
+        return smallImagesDir;
+    }
+
+    // Gets the directory that holds the large images.
+    private static File getLargeImagesDir(Context context) {
+        File largeImagesDir = context.getDir(LARGE_IMAGES_DIR, Context.MODE_PRIVATE);
+        if (!largeImagesDir.exists())
+            largeImagesDir.mkdirs();
+        return largeImagesDir;
+    }
+
+    // Writes a bitmap to the specified file.
+    private static void writeImageToFile(Bitmap toWrite, File imageFile) throws IOException {
         FileOutputStream imageFileStream = new FileOutputStream(imageFile);
         toWrite.compress(Bitmap.CompressFormat.JPEG, 85, imageFileStream);
         imageFileStream.flush();
         imageFileStream.close();
     }
 
+    // Gets a file reference for a wallpaper's image in a directory.
+    private static File getFileForImage(File directory, Wallpaper wallpaper) {
+        String fileName = wallpaper.getId() + ".jpg";
+        return new File(directory, fileName);
+    }
+
+    // Gets the small image file for a wallpaper.
+    private static File getSmallImageFile(Context context, Wallpaper wallpaper) {
+        return getFileForImage(getSmallImagesDir(context), wallpaper);
+    }
+
+    // Gets the large image file for a wallpaper.
+    private static File getLargeImageFile(Context context, Wallpaper wallpaper) {
+        return getFileForImage(getLargeImagesDir(context), wallpaper);
+    }
+
     // Stores WallpaperBitmaps in the file system and saves the Wallpaper in the database.
     public static Wallpaper createWallpaperFromBitmaps(Context context, WallpaperBitmaps imagesToUse) throws IOException {
-        // Setup the directories for images.
-        File smallImagesDir = context.getDir(SMALL_IMAGES_DIR, Context.MODE_PRIVATE);
-        if (!smallImagesDir.exists())
-            smallImagesDir.mkdirs();
-
-        File largeImagesDir = context.getDir(LARGE_IMAGES_DIR, Context.MODE_PRIVATE);
-        if (!largeImagesDir.exists())
-            smallImagesDir.mkdirs();
-
         // Create the wallpaper.
         Wallpaper wallpaper = new Wallpaper();
         wallpaper.setDaysAsWallpaper(0);
@@ -78,11 +101,9 @@ public class WallpaperUtils {
         // Add the wallpaper to the database.
         WallpaperDbHelper.getInstance(context).addWallpaper(wallpaper);
 
-        String fileName = wallpaper.getId() + ".jpg";
-
         // Save the images.
-        writeImageToFile(imagesToUse.getSmallImage(), smallImagesDir, fileName);
-        writeImageToFile(imagesToUse.getLargeImage(), largeImagesDir, fileName);
+        writeImageToFile(imagesToUse.getSmallImage(), getSmallImageFile(context, wallpaper));
+        writeImageToFile(imagesToUse.getLargeImage(), getLargeImageFile(context, wallpaper));
 
         return wallpaper;
     }
