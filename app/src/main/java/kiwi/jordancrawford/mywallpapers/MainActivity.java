@@ -6,6 +6,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
 import android.support.design.widget.FloatingActionButton;
@@ -21,13 +22,14 @@ import android.widget.Toast;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.List;
+import java.util.concurrent.ExecutionException;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements OnTaskCompleted {
 
     private final int PICK_IMAGE_REQUEST = 1;
     private final int SET_WALLPAPER_REQUEST = 2;
     private final String INTENT_USED_KEY = "used";
-    private final double SCALE_MAX_DIMENSION = 512.0;
 
     private ImageView sentImageDisplay;
 
@@ -45,28 +47,17 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private int getAdjustedImageDimension(int currentSize, int largestDimension) {
-        return (int) (currentSize * (SCALE_MAX_DIMENSION / largestDimension));
-    }
-
-    private Bitmap getSmallVersion(Bitmap image) {
-        int smallWidth, smallHeight;
-        // Scale the image to its smallest size.
-        if (image.getWidth() > image.getHeight()) {
-            smallWidth = (int) SCALE_MAX_DIMENSION;
-            smallHeight = getAdjustedImageDimension(image.getHeight(),image.getWidth());
-        } else {
-            smallWidth =  getAdjustedImageDimension(image.getWidth(), image.getHeight());
-            smallHeight = (int) SCALE_MAX_DIMENSION;
+    public void onTaskCompleted(String taskKey, AsyncTask task) {
+        if (taskKey.equals(ProcessSentImage.TASK_KEY)) {
+            ProcessSentImage processSentImageTask = (ProcessSentImage) task;
+            try {
+                WallpaperBitmaps bitmaps = processSentImageTask.get();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            } catch (ExecutionException e) {
+                e.printStackTrace();
+            }
         }
-
-        Bitmap scaledImage = Bitmap.createScaledBitmap(image, smallWidth, smallHeight, true);
-        return scaledImage;
-    }
-
-    // Adds the provided image to the database and includes it in the display.
-    private void processSharedIncomingImage(Bitmap image) {
-
     }
 
     @Override
@@ -79,6 +70,38 @@ public class MainActivity extends AppCompatActivity {
         String intentAction = intent.getAction();
         sentImageDisplay = (ImageView) findViewById(R.id.sent_image_display);
 
+        // Evil blocking
+        List<Wallpaper> wallpapers = WallpaperDbHelper.getInstance(this).getAllWallpapers();
+        System.out.println("Existing wallpapers");
+        for (Wallpaper currentWallpaper : wallpapers) {
+            System.out.println(currentWallpaper.toString());
+        }
+
+        Wallpaper testWallpaper = new Wallpaper();
+        testWallpaper.setLargePictureFilename("something large");
+        testWallpaper.setSmallPictureFilename("something small");
+        testWallpaper.setDaysAsWallpaper(50);
+
+        System.out.println("Added wallpaper");
+        WallpaperDbHelper.getInstance(this).addWallpaper(testWallpaper);
+        System.out.println(testWallpaper.toString());
+
+        List<Wallpaper> wallpapersPostAdd = WallpaperDbHelper.getInstance(this).getAllWallpapers();
+        System.out.println("Existing wallpapers post add");
+        for (Wallpaper currentWallpaper : wallpapersPostAdd) {
+            System.out.println(currentWallpaper.toString());
+        }
+
+        System.out.println(WallpaperDbHelper.getInstance(this).deleteWallpaper(testWallpaper));
+
+        List<Wallpaper> wallpapersPostDelete = WallpaperDbHelper.getInstance(this).getAllWallpapers();
+        System.out.println("Existing wallpapers post delete");
+        for (Wallpaper currentWallpaper : wallpapersPostDelete) {
+            System.out.println(currentWallpaper.toString());
+        }
+
+        // End evil blocking
+
         if (Intent.ACTION_SEND.equals(intentAction) && !intent.hasExtra(INTENT_USED_KEY)) {
             // Mark the intent as used.
             intent.putExtra(INTENT_USED_KEY, true);
@@ -86,22 +109,7 @@ public class MainActivity extends AppCompatActivity {
             // Check this is an image.
             if (intent.getType().startsWith("image/")) {
                 Uri imageUri = (Uri) intent.getParcelableExtra(Intent.EXTRA_STREAM);
-
-                // Check this image Uri exists.
-                if (imageUri != null) {
-                    sentImageDisplay.setImageURI(imageUri);
-
-                    // Try display the content.
-                    try {
-                        Bitmap largeImage = ExifUtil.getCorrectlyOrientedImage(this, imageUri, 3000);
-                        Bitmap smallImage = getSmallVersion(largeImage);
-                        sentImageDisplay.setImageBitmap(smallImage);
-                        Toast.makeText(this, R.string.sent_content_received, Toast.LENGTH_SHORT).show();
-                    } catch (IOException exception) {
-                        Toast.makeText(this, R.string.sent_content_error, Toast.LENGTH_LONG).show();
-                    }
-                }
-            }
+                new ProcessSentImage(this).execute(imageUri);
         }
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
