@@ -21,7 +21,6 @@ import android.widget.Toast;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -79,38 +78,6 @@ public class MainActivity extends AppCompatActivity {
         Intent intent = getIntent();
         String intentAction = intent.getAction();
         sentImageDisplay = (ImageView) findViewById(R.id.sent_image_display);
-
-        // Evil blocking
-        List<Wallpaper> wallpapers = WallpaperDbHelper.getInstance(this).getAllWallpapers();
-        System.out.println("Existing wallpapers");
-        for (Wallpaper currentWallpaper : wallpapers) {
-            System.out.println(currentWallpaper.toString());
-        }
-
-        Wallpaper testWallpaper = new Wallpaper();
-        testWallpaper.setLargePictureFilename("something large");
-        testWallpaper.setSmallPictureFilename("something small");
-        testWallpaper.setDaysAsWallpaper(50);
-
-        System.out.println("Added wallpaper");
-        WallpaperDbHelper.getInstance(this).addWallpaper(testWallpaper);
-        System.out.println(testWallpaper.toString());
-
-        List<Wallpaper> wallpapersPostAdd = WallpaperDbHelper.getInstance(this).getAllWallpapers();
-        System.out.println("Existing wallpapers post add");
-        for (Wallpaper currentWallpaper : wallpapersPostAdd) {
-            System.out.println(currentWallpaper.toString());
-        }
-
-        System.out.println(WallpaperDbHelper.getInstance(this).deleteWallpaper(testWallpaper));
-
-        List<Wallpaper> wallpapersPostDelete = WallpaperDbHelper.getInstance(this).getAllWallpapers();
-        System.out.println("Existing wallpapers post delete");
-        for (Wallpaper currentWallpaper : wallpapersPostDelete) {
-            System.out.println(currentWallpaper.toString());
-        }
-
-        // End evil blocking
 
         if (Intent.ACTION_SEND.equals(intentAction) && !intent.hasExtra(INTENT_USED_KEY)) {
             // Mark the intent as used.
