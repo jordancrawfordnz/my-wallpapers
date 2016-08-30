@@ -78,29 +78,6 @@ public class MainActivity extends AppCompatActivity {
         for (Wallpaper currentWallpaper : wallpapers) {
             System.out.println(currentWallpaper.toString());
         }
-
-        Wallpaper testWallpaper = new Wallpaper();
-        testWallpaper.setLargePictureFilename("something large");
-        testWallpaper.setSmallPictureFilename("something small");
-        testWallpaper.setDaysAsWallpaper(50);
-
-        System.out.println("Added wallpaper");
-        WallpaperDbHelper.getInstance(this).addWallpaper(testWallpaper);
-        System.out.println(testWallpaper.toString());
-
-        List<Wallpaper> wallpapersPostAdd = WallpaperDbHelper.getInstance(this).getAllWallpapers();
-        System.out.println("Existing wallpapers post add");
-        for (Wallpaper currentWallpaper : wallpapersPostAdd) {
-            System.out.println(currentWallpaper.toString());
-        }
-
-        System.out.println(WallpaperDbHelper.getInstance(this).deleteWallpaper(testWallpaper));
-
-        List<Wallpaper> wallpapersPostDelete = WallpaperDbHelper.getInstance(this).getAllWallpapers();
-        System.out.println("Existing wallpapers post delete");
-        for (Wallpaper currentWallpaper : wallpapersPostDelete) {
-            System.out.println(currentWallpaper.toString());
-        }
         // End evil blocking
 
         LocalBroadcastManager.getInstance(this).registerReceiver(wallpaperAddedMessageReceiver, new IntentFilter(WALLPAPER_ADDED_BROADCAST_INTENT));
@@ -125,7 +102,6 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         LocalBroadcastManager.getInstance(this).unregisterReceiver(wallpaperAddedMessageReceiver);
-        System.out.println("Destory broadcast listener");
         super.onDestroy();
     }
 
@@ -145,7 +121,6 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         protected Wallpaper doInBackground(Uri... uris) {
-            System.out.println("Async task running");
             // Process the image.
             if (uris.length == 0) {
                 return null;
@@ -155,7 +130,7 @@ public class MainActivity extends AppCompatActivity {
                 WallpaperBitmaps wallpaperBitmaps = WallpaperUtils.getProcessedBitmapsFromUri(context, imageUri);
 
                 // Create the Wallpaper by persisting it.
-                Wallpaper createdWallpaper = WallpaperUtils.createWallpaperFromBitmaps(wallpaperBitmaps);
+                Wallpaper createdWallpaper = WallpaperUtils.createWallpaperFromBitmaps(context, wallpaperBitmaps);
 
                 return createdWallpaper;
             } catch (IOException e) {
