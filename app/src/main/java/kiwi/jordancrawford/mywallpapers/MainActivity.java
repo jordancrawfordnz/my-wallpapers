@@ -8,6 +8,7 @@ import android.content.IntentFilter;
 import android.content.res.Configuration;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.BoolRes;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
@@ -52,6 +53,16 @@ public class MainActivity extends AppCompatActivity {
         }
     };
 
+    private BroadcastReceiver setWallpaperMessageReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Wallpaper wallpaper = intent.getParcelableExtra(WallpaperListAdapter.WALLPAPER_EXTRA);
+            Uri uri = WallpaperUtils.getLargeImageUri(context, wallpaper);
+            Intent changeWallpaperIntent = WallpaperManager.getInstance(context).getCropAndSetWallpaperIntent(uri);
+            startActivityForResult(changeWallpaperIntent, SET_WALLPAPER_REQUEST);
+        }
+    };
+
     // Starts the GetAllWallpapers task.
     private void loadAllWallpapers() {
         new GetAllWallpapers(this).execute();
@@ -75,6 +86,8 @@ public class MainActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == PICK_IMAGE_REQUEST && resultCode == RESULT_OK && data != null && data.getData() != null) {
+            // TODO: Turn this into add wallpaper.
+
             Uri uri = data.getData();
             Intent changeWallpaperIntent = WallpaperManager.getInstance(this).getCropAndSetWallpaperIntent(uri);
             startActivityForResult(changeWallpaperIntent, SET_WALLPAPER_REQUEST);
@@ -94,6 +107,7 @@ public class MainActivity extends AppCompatActivity {
 
         LocalBroadcastManager.getInstance(this).registerReceiver(wallpaperAddedMessageReceiver, new IntentFilter(ProcessSentImage.WALLPAPER_ADDED_BROADCAST_INTENT));
         LocalBroadcastManager.getInstance(this).registerReceiver(getAllWallpaperMessageReceiver, new IntentFilter(GetAllWallpapers.GET_ALL_WALLPAPERS_BROADCAST_INTENT));
+        LocalBroadcastManager.getInstance(this).registerReceiver(setWallpaperMessageReceiver, new IntentFilter(WallpaperListAdapter.SET_WALLPAPER_BROADCAST_INTENT));
 
         processIntent(getIntent());
         loadAllWallpapers();
@@ -126,6 +140,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onDestroy() {
         LocalBroadcastManager.getInstance(this).unregisterReceiver(wallpaperAddedMessageReceiver);
         LocalBroadcastManager.getInstance(this).unregisterReceiver(getAllWallpaperMessageReceiver);
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(setWallpaperMessageReceiver);
         super.onDestroy();
     }
 
