@@ -80,7 +80,7 @@ public class WallpaperDbHelper extends SQLiteOpenHelper {
 //
 //    }
 
-    public List<Wallpaper> getAllWallpapers() {
+    public ArrayList<Wallpaper> getAllWallpapers() {
         String[] projection = {
                 WallpaperEntry._ID,
                 WallpaperEntry.COLUMN_NAME_DAYS_AS_WALLPAPER,
@@ -93,7 +93,7 @@ public class WallpaperDbHelper extends SQLiteOpenHelper {
                 null,
                 null,
                 null);
-        List<Wallpaper> wallpaperResult = new ArrayList<>();
+        ArrayList<Wallpaper> wallpaperResult = new ArrayList<>();
         if (queryResult.moveToFirst()) {
             do {
                 Wallpaper currentWallpaper = new Wallpaper();

@@ -16,7 +16,10 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.Toast;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.lang.reflect.Array;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
@@ -25,29 +28,32 @@ public class MainActivity extends AppCompatActivity {
     private final int PICK_IMAGE_REQUEST = 1;
     private final int SET_WALLPAPER_REQUEST = 2;
     private final String INTENT_USED_KEY = "used";
-    public final String WALLPAPER_ADDED_BROADCAST_INTENT = "wallpaper_added_message";
     private ImageView sentImageDisplay;
-
 
     private BroadcastReceiver wallpaperAddedMessageReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            System.out.println("Activity will refresh");
+            loadAllWallpapers();
         }
     };
 
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == PICK_IMAGE_REQUEST && resultCode == RESULT_OK && data != null && data.getData() != null) {
-            Uri uri = data.getData();
-            Intent changeWallpaperIntent = WallpaperManager.getInstance(this).getCropAndSetWallpaperIntent(uri);
-            startActivityForResult(changeWallpaperIntent, SET_WALLPAPER_REQUEST);
-        } else if (requestCode == SET_WALLPAPER_REQUEST) {
-            if (resultCode == RESULT_OK) {
-                Toast.makeText(this, R.string.wallpaper_set, Toast.LENGTH_SHORT).show();
+    private BroadcastReceiver getAllWallpaperMessageReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            ArrayList<Wallpaper> wallpapers = intent.getParcelableArrayListExtra(GetAllWallpapers.ALL_WALLPAPERS_EXTRA);
+
+            System.out.println("Existing wallpapers");
+            for (Wallpaper currentWallpaper : wallpapers) {
+                System.out.println(currentWallpaper.toString());
             }
+
         }
+    };
+
+    // Starts the GetAllWallpapers task.
+    private void loadAllWallpapers() {
+        System.out.println("Loading all wallpapers");
+        new GetAllWallpapers(this).execute();
     }
 
     private void processIntent(Intent intent) {
@@ -65,6 +71,20 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == PICK_IMAGE_REQUEST && resultCode == RESULT_OK && data != null && data.getData() != null) {
+            Uri uri = data.getData();
+            Intent changeWallpaperIntent = WallpaperManager.getInstance(this).getCropAndSetWallpaperIntent(uri);
+            startActivityForResult(changeWallpaperIntent, SET_WALLPAPER_REQUEST);
+        } else if (requestCode == SET_WALLPAPER_REQUEST) {
+            if (resultCode == RESULT_OK) {
+                Toast.makeText(this, R.string.wallpaper_set, Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
+
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
@@ -72,17 +92,11 @@ public class MainActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
         sentImageDisplay = (ImageView) findViewById(R.id.sent_image_display);
 
-        // Evil blocking
-        List<Wallpaper> wallpapers = WallpaperDbHelper.getInstance(this).getAllWallpapers();
-        System.out.println("Existing wallpapers");
-        for (Wallpaper currentWallpaper : wallpapers) {
-            System.out.println(currentWallpaper.toString());
-        }
-        // End evil blocking
-
-        LocalBroadcastManager.getInstance(this).registerReceiver(wallpaperAddedMessageReceiver, new IntentFilter(WALLPAPER_ADDED_BROADCAST_INTENT));
+        LocalBroadcastManager.getInstance(this).registerReceiver(wallpaperAddedMessageReceiver, new IntentFilter(ProcessSentImage.WALLPAPER_ADDED_BROADCAST_INTENT));
+        LocalBroadcastManager.getInstance(this).registerReceiver(getAllWallpaperMessageReceiver, new IntentFilter(GetAllWallpapers.GET_ALL_WALLPAPERS_BROADCAST_INTENT));
 
         processIntent(getIntent());
+        loadAllWallpapers();
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -102,6 +116,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         LocalBroadcastManager.getInstance(this).unregisterReceiver(wallpaperAddedMessageReceiver);
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(getAllWallpaperMessageReceiver);
         super.onDestroy();
     }
 
@@ -110,41 +125,4 @@ public class MainActivity extends AppCompatActivity {
         processIntent(intent);
     }
 
-    // Does all the processing on images sent to the activity. After completion, sents a broadcast to the activity (if it is around) to refresh the list of Wallpapers.
-    private class ProcessSentImage extends AsyncTask<Uri, Void, Wallpaper> {
-        private Context context;
-
-        public ProcessSentImage(Context context) {
-            super();
-            this.context = context.getApplicationContext();
-        }
-
-        @Override
-        protected Wallpaper doInBackground(Uri... uris) {
-            // Process the image.
-            if (uris.length == 0) {
-                return null;
-            }
-            Uri imageUri = uris[0];
-            try {
-                WallpaperBitmaps wallpaperBitmaps = WallpaperUtils.getProcessedBitmapsFromUri(context, imageUri);
-
-                // Create the Wallpaper by persisting it.
-                Wallpaper createdWallpaper = WallpaperUtils.createWallpaperFromBitmaps(context, wallpaperBitmaps);
-
-                return createdWallpaper;
-            } catch (IOException e) {
-                e.printStackTrace();
-                return null;
-            }
-        }
-
-        protected void onPostExecute(Wallpaper result) {
-            // Send a broadcast to the activity if there is a result.
-            if (result != null) {
-                Intent intent = new Intent(WALLPAPER_ADDED_BROADCAST_INTENT);
-                LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
-            }
-        }
-    }
 }
