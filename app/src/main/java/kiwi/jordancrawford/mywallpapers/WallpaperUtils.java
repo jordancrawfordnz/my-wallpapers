@@ -83,6 +83,9 @@ public class WallpaperUtils {
 
     // Gets a file reference for a wallpaper's image in a directory.
     private static File getFileForImage(File directory, Wallpaper wallpaper) {
+        if (wallpaper.getId() == -1) {
+            throw new IllegalArgumentException("The wallpaper has no ID provided. Is it saved?");
+        }
         String fileName = wallpaper.getId() + ".jpg";
         return new File(directory, fileName);
     }
@@ -99,8 +102,12 @@ public class WallpaperUtils {
 
     // Get the URI for a the wallpapers small image.
     public static Uri getSmallImageUri(Context context, Wallpaper wallpaper) {
-            // TODO: Error handling if this isn't saved. Throw an exception?
         return FileProvider.getUriForFile(context, IMAGE_URI_PREFIX, getSmallImageFile(context, wallpaper));
+    }
+
+    // Get the URI for a the wallpapers large image.
+    public static Uri getLargeImageUri(Context context, Wallpaper wallpaper) {
+        return FileProvider.getUriForFile(context, IMAGE_URI_PREFIX, getLargeImageFile(context, wallpaper));
     }
 
     // Stores WallpaperBitmaps in the file system and saves the Wallpaper in the database.

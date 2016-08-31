@@ -6,29 +6,27 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.Toast;
-
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.lang.reflect.Array;
 import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.ExecutionException;
 
 public class MainActivity extends AppCompatActivity {
 
     private final int PICK_IMAGE_REQUEST = 1;
     private final int SET_WALLPAPER_REQUEST = 2;
     private final String INTENT_USED_KEY = "used";
-    private ImageView sentImageDisplay;
+    private ArrayList<Wallpaper> wallpapers = new ArrayList<>();
+    private RecyclerView wallpaperRecyclerView;
+    private RecyclerView.LayoutManager wallpaperRecyclerViewLayoutManager;
+    private RecyclerView.Adapter wallpaperRecyclerViewAdapter;
 
     private BroadcastReceiver wallpaperAddedMessageReceiver = new BroadcastReceiver() {
         @Override
@@ -40,15 +38,16 @@ public class MainActivity extends AppCompatActivity {
     private BroadcastReceiver getAllWallpaperMessageReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            ArrayList<Wallpaper> wallpapers = intent.getParcelableArrayListExtra(GetAllWallpapers.ALL_WALLPAPERS_EXTRA);
+            ArrayList<Wallpaper> updatedWallpapers = intent.getParcelableArrayListExtra(GetAllWallpapers.ALL_WALLPAPERS_EXTRA);
 
             System.out.println("Existing wallpapers");
-            for (Wallpaper currentWallpaper : wallpapers) {
+            for (Wallpaper currentWallpaper : updatedWallpapers) {
                 System.out.println(currentWallpaper.toString());
             }
 
-            Uri smallImageUri = WallpaperUtils.getSmallImageUri(context, wallpapers.get(0));
-            sentImageDisplay.setImageURI(smallImageUri);
+            wallpapers.clear();
+            wallpapers.addAll(updatedWallpapers);
+            wallpaperRecyclerViewAdapter.notifyItemRangeChanged(0, wallpapers.size());
         }
     };
 
@@ -91,13 +90,19 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        sentImageDisplay = (ImageView) findViewById(R.id.sent_image_display);
 
         LocalBroadcastManager.getInstance(this).registerReceiver(wallpaperAddedMessageReceiver, new IntentFilter(ProcessSentImage.WALLPAPER_ADDED_BROADCAST_INTENT));
         LocalBroadcastManager.getInstance(this).registerReceiver(getAllWallpaperMessageReceiver, new IntentFilter(GetAllWallpapers.GET_ALL_WALLPAPERS_BROADCAST_INTENT));
 
         processIntent(getIntent());
         loadAllWallpapers();
+
+        // Setup the wallpaper recycler view.
+        wallpaperRecyclerView = (RecyclerView) findViewById(R.id.wallpaper_list_recycler_view);
+        wallpaperRecyclerViewLayoutManager = new StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL);
+        wallpaperRecyclerView.setLayoutManager(wallpaperRecyclerViewLayoutManager);
+        wallpaperRecyclerViewAdapter = new WallpaperListAdapter(this, wallpapers);
+        wallpaperRecyclerView.setAdapter(wallpaperRecyclerViewAdapter);
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {

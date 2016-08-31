@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.support.v4.content.LocalBroadcastManager;
+import android.widget.Toast;
 
 import java.io.IOException;
 
@@ -47,6 +48,9 @@ public class ProcessSentImage extends AsyncTask<Uri, Void, Wallpaper> {
         if (result != null) {
             Intent intent = new Intent(WALLPAPER_ADDED_BROADCAST_INTENT);
             LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
+            Toast.makeText(context, R.string.sent_content_received, Toast.LENGTH_SHORT).show();
+        } else {
+            Toast.makeText(context, R.string.sent_content_error, Toast.LENGTH_LONG).show();
         }
     }
 }
