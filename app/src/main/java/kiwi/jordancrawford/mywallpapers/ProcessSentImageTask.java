@@ -14,11 +14,11 @@ import java.io.IOException;
  *
  * Created by Jordan on 31/08/16.
  */
-public class ProcessSentImage extends AsyncTask<Uri, Void, Wallpaper> {
+public class ProcessSentImageTask extends AsyncTask<Uri, Void, Wallpaper> {
     public static final String WALLPAPER_ADDED_BROADCAST_INTENT = "wallpaper_added_message";
     private Context context;
 
-    public ProcessSentImage(Context context) {
+    public ProcessSentImageTask(Context context) {
         super();
         this.context = context.getApplicationContext();
     }

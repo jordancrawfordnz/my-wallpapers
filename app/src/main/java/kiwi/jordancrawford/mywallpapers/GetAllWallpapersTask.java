@@ -13,12 +13,12 @@ import java.util.List;
  * Gets all wallpapers from the database asynchronously.
  * Created by Jordan on 31/08/16.
  */
-public class GetAllWallpapers extends AsyncTask<Void, Void, ArrayList<Wallpaper>> {
+public class GetAllWallpapersTask extends AsyncTask<Void, Void, ArrayList<Wallpaper>> {
     public static final String GET_ALL_WALLPAPERS_BROADCAST_INTENT = "get_all_wallpapers_message";
     public static final String ALL_WALLPAPERS_EXTRA = "all_wallpapers";
 
     private Context context;
-    public GetAllWallpapers(Context context) {
+    public GetAllWallpapersTask(Context context) {
         super();
         this.context = context.getApplicationContext();
     }

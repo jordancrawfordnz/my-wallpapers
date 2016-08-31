@@ -3,6 +3,7 @@ package kiwi.jordancrawford.mywallpapers;
 import android.app.WallpaperManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.res.Configuration;
@@ -11,12 +12,12 @@ import android.os.Bundle;
 import android.support.annotation.BoolRes;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.content.LocalBroadcastManager;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
-import android.widget.ImageView;
 import android.widget.Toast;
 import java.util.ArrayList;
 
@@ -40,7 +41,7 @@ public class MainActivity extends AppCompatActivity {
     private BroadcastReceiver getAllWallpaperMessageReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            ArrayList<Wallpaper> updatedWallpapers = intent.getParcelableArrayListExtra(GetAllWallpapers.ALL_WALLPAPERS_EXTRA);
+            ArrayList<Wallpaper> updatedWallpapers = intent.getParcelableArrayListExtra(GetAllWallpapersTask.ALL_WALLPAPERS_EXTRA);
 
             System.out.println("Existing wallpapers");
             for (Wallpaper currentWallpaper : updatedWallpapers) {
@@ -49,7 +50,7 @@ public class MainActivity extends AppCompatActivity {
 
             wallpapers.clear();
             wallpapers.addAll(updatedWallpapers);
-            wallpaperRecyclerViewAdapter.notifyItemRangeChanged(0, wallpapers.size());
+            wallpaperRecyclerViewAdapter.notifyDataSetChanged();
         }
     };
 
@@ -57,15 +58,56 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void onReceive(Context context, Intent intent) {
             Wallpaper wallpaper = intent.getParcelableExtra(WallpaperListAdapter.WALLPAPER_EXTRA);
+
+            // Show the wallpaper manager's dialog to set the wallpaper.
             Uri uri = WallpaperUtils.getLargeImageUri(context, wallpaper);
             Intent changeWallpaperIntent = WallpaperManager.getInstance(context).getCropAndSetWallpaperIntent(uri);
             startActivityForResult(changeWallpaperIntent, SET_WALLPAPER_REQUEST);
+
+            // TODO: Mark this as the current wallpaper.
         }
     };
 
-    // Starts the GetAllWallpapers task.
+    private BroadcastReceiver deleteWallpaperMessageReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(final Context context, Intent intent) {
+            final Wallpaper wallpaper = intent.getParcelableExtra(WallpaperListAdapter.WALLPAPER_EXTRA);
+
+            // Show a prompt for the user to confirm deletion.
+            AlertDialog alertDialog = new AlertDialog.Builder(MainActivity.this).create();
+            alertDialog.setTitle(R.string.wallpaper_delete_confirm_title);
+            alertDialog.setMessage(getString(R.string.wallpaper_delete_confirm_message));
+
+            alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, getString(R.string.wallpaper_delete_confirm_cancel_button),
+                    new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int which) {
+                            dialog.dismiss();
+                        }
+                    });
+
+            alertDialog.setButton(AlertDialog.BUTTON_NEGATIVE, getString(R.string.wallpaper_delete_confirm_delete_button),
+                    new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int which) {
+                            new DeleteWallpaperTask(context).execute(wallpaper);
+                            dialog.dismiss();
+                        }
+                    });
+
+            alertDialog.show();
+        }
+    };
+
+    private BroadcastReceiver wallpaperDeletedMessageReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            // Reload the wallpapers to exclude the deleted wallpaper.
+            loadAllWallpapers();
+        }
+    };
+
+    // Starts the GetAllWallpapersTask task.
     private void loadAllWallpapers() {
-        new GetAllWallpapers(this).execute();
+        new GetAllWallpapersTask(this).execute();
     }
 
     private void processIntent(Intent intent) {
@@ -77,7 +119,7 @@ public class MainActivity extends AppCompatActivity {
             // Check this is an image.
             if (intent.getType().startsWith("image/")) {
                 Uri imageUri = (Uri) intent.getParcelableExtra(Intent.EXTRA_STREAM);
-                new ProcessSentImage(this).execute(imageUri);
+                new ProcessSentImageTask(this).execute(imageUri);
             }
         }
     }
@@ -105,9 +147,11 @@ public class MainActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        LocalBroadcastManager.getInstance(this).registerReceiver(wallpaperAddedMessageReceiver, new IntentFilter(ProcessSentImage.WALLPAPER_ADDED_BROADCAST_INTENT));
-        LocalBroadcastManager.getInstance(this).registerReceiver(getAllWallpaperMessageReceiver, new IntentFilter(GetAllWallpapers.GET_ALL_WALLPAPERS_BROADCAST_INTENT));
+        LocalBroadcastManager.getInstance(this).registerReceiver(wallpaperAddedMessageReceiver, new IntentFilter(ProcessSentImageTask.WALLPAPER_ADDED_BROADCAST_INTENT));
+        LocalBroadcastManager.getInstance(this).registerReceiver(getAllWallpaperMessageReceiver, new IntentFilter(GetAllWallpapersTask.GET_ALL_WALLPAPERS_BROADCAST_INTENT));
         LocalBroadcastManager.getInstance(this).registerReceiver(setWallpaperMessageReceiver, new IntentFilter(WallpaperListAdapter.SET_WALLPAPER_BROADCAST_INTENT));
+        LocalBroadcastManager.getInstance(this).registerReceiver(deleteWallpaperMessageReceiver, new IntentFilter(WallpaperListAdapter.DELETE_WALLPAPER_BROADCAST_INTENT));
+        LocalBroadcastManager.getInstance(this).registerReceiver(wallpaperDeletedMessageReceiver, new IntentFilter(DeleteWallpaperTask.WALLPAPER_DELETED_BROADCAST_INTENT));
 
         processIntent(getIntent());
         loadAllWallpapers();
@@ -141,6 +185,8 @@ public class MainActivity extends AppCompatActivity {
         LocalBroadcastManager.getInstance(this).unregisterReceiver(wallpaperAddedMessageReceiver);
         LocalBroadcastManager.getInstance(this).unregisterReceiver(getAllWallpaperMessageReceiver);
         LocalBroadcastManager.getInstance(this).unregisterReceiver(setWallpaperMessageReceiver);
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(deleteWallpaperMessageReceiver);
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(wallpaperDeletedMessageReceiver);
         super.onDestroy();
     }
 

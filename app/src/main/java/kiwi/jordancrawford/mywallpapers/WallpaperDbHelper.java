@@ -18,7 +18,7 @@ import static kiwi.jordancrawford.mywallpapers.WallpaperContract.ConfigEntry;
 public class WallpaperDbHelper extends SQLiteOpenHelper {
     private static final String NO_ID_EXCEPTION_MESSAGE = "No ID on record. Is it saved?";
     private static final String HAS_ID_EXCEPTION_MESSAGE = "Record has ID. Has it already been saved?";
-    private static final String ID_PROPERTIES = "INTEGER PRIMARY KEY";
+    private static final String ID_PROPERTIES = "INTEGER PRIMARY KEY AUTOINCREMENT";
     private static final String SQL_CREATE_TABLE_WALLPAPERS =
             "CREATE TABLE " + WallpaperEntry.TABLE_NAME + "("
             + WallpaperEntry._ID + " " + ID_PROPERTIES + ","

@@ -110,6 +110,18 @@ public class WallpaperUtils {
         return FileProvider.getUriForFile(context, IMAGE_URI_PREFIX, getLargeImageFile(context, wallpaper));
     }
 
+    // Deletes a wallpaper from the database and the internal storage.
+    public static void deleteWallpaper(Context context, Wallpaper wallpaperToDelete) {
+        // Delete the wallpaper from the database.
+        WallpaperDbHelper.getInstance(context).deleteWallpaper(wallpaperToDelete);
+
+        // Delete the images from the filesystem.
+        File largeImage = getLargeImageFile(context, wallpaperToDelete);
+        File smallImage = getSmallImageFile(context, wallpaperToDelete);
+        largeImage.delete();
+        smallImage.delete();
+    }
+
     // Stores WallpaperBitmaps in the file system and saves the Wallpaper in the database.
     public static Wallpaper createWallpaperFromBitmaps(Context context, WallpaperBitmaps imagesToUse) throws IOException {
         // Create the wallpaper.

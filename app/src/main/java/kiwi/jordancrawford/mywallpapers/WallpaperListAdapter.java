@@ -20,6 +20,7 @@ public class WallpaperListAdapter extends RecyclerView.Adapter<WallpaperListAdap
     private Context context;
     private ArrayList<Wallpaper> wallpapers;
     public static final String SET_WALLPAPER_BROADCAST_INTENT = "set_wallpaper_message";
+    public static final String DELETE_WALLPAPER_BROADCAST_INTENT = "delete_wallpaper_message";
     public static final String WALLPAPER_EXTRA = "wallpaper";
 
     public WallpaperListAdapter(Context context, ArrayList<Wallpaper> wallpapers) {
@@ -79,8 +80,9 @@ public class WallpaperListAdapter extends RecyclerView.Adapter<WallpaperListAdap
             deleteButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    // TODO: Send an event to the activity.
-                    System.out.println("Delete");
+                    Intent intent = new Intent(DELETE_WALLPAPER_BROADCAST_INTENT);
+                    intent.putExtra(WALLPAPER_EXTRA, wallpaper);
+                    LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
                 }
             });
         }
