@@ -4,4 +4,6 @@
     <string name="wallpaper_set">Wallpaper set successfully!</string>
     <string name="sent_content_error">A problem happened while receiving an image from another app.</string>
     <string name="sent_content_received">Added a new wallpaper from another app.</string>
+    <string name="wallpaper_card_set_button">Use</string>
+    <string name="wallpaper_card_delete_button">Delete</string>
 </resources>

@@ -5,6 +5,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -46,6 +47,8 @@ public class WallpaperListAdapter extends RecyclerView.Adapter<WallpaperListAdap
         private View view;
         private ImageView previewImageView;
         private TextView daysAsWallpaperView;
+        private Button deleteButton;
+        private Button setButton;
 
         public WallpaperViewHolder(View view) {
             super(view);
@@ -53,13 +56,28 @@ public class WallpaperListAdapter extends RecyclerView.Adapter<WallpaperListAdap
 
             this.previewImageView = (ImageView) view.findViewById(R.id.wallpaper_image_view);
             this.daysAsWallpaperView = (TextView) view.findViewById(R.id.wallpaper_days_as_wallpaper);
+            this.setButton = (Button) view.findViewById(R.id.wallpaper_card_set_button);
+            this.deleteButton = (Button) view.findViewById(R.id.wallpaper_card_delete_button);
         }
 
         public void setupView(final Wallpaper wallpaper) {
             previewImageView.setImageURI(WallpaperUtils.getSmallImageUri(context, wallpaper));
             daysAsWallpaperView.setText(String.valueOf(wallpaper.getDaysAsWallpaper()));
+            setButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    // TODO: Send an event to the activity.
+                    System.out.println("Set");
+                }
+            });
 
-            // TODO: On click of a button, send an event to activity.
+            deleteButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    // TODO: Send an event to the activity.
+                    System.out.println("Delete");
+                }
+            });
         }
     }
 

@@ -5,6 +5,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.res.Configuration;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
@@ -99,7 +100,9 @@ public class MainActivity extends AppCompatActivity {
 
         // Setup the wallpaper recycler view.
         wallpaperRecyclerView = (RecyclerView) findViewById(R.id.wallpaper_list_recycler_view);
-        wallpaperRecyclerViewLayoutManager = new StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL);
+        int deviceOrientation = getResources().getConfiguration().orientation;
+        int numberOfColumns = deviceOrientation == Configuration.ORIENTATION_LANDSCAPE ? 2 : 1;
+        wallpaperRecyclerViewLayoutManager = new StaggeredGridLayoutManager(numberOfColumns, StaggeredGridLayoutManager.VERTICAL);
         wallpaperRecyclerView.setLayoutManager(wallpaperRecyclerViewLayoutManager);
         wallpaperRecyclerViewAdapter = new WallpaperListAdapter(this, wallpapers);
         wallpaperRecyclerView.setAdapter(wallpaperRecyclerViewAdapter);
