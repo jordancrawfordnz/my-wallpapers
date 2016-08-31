@@ -1,0 +1,4 @@
+<paths>
+    <files-path name="small" path="small_images/"/>
+    <files-path name="large" path="large_images/"/>
+</paths>

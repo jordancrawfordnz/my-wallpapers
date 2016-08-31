@@ -3,10 +3,12 @@ package kiwi.jordancrawford.mywallpapers;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.net.Uri;
+import android.support.v4.content.FileProvider;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.net.URI;
 
 /**
  * Created by Jordan on 31/08/16.
@@ -16,6 +18,7 @@ public class WallpaperUtils {
     private static final int LARGE_IMAGE_MAX_DIMENSION = 3000;
     private static final String SMALL_IMAGES_DIR = "small_images";
     private static final String LARGE_IMAGES_DIR = "large_images";
+    private static final String IMAGE_URI_PREFIX = "kiwi.jordancrawford.mywallpapers";
 
     // Determines the secondary dimension to use when given its current size and the size of the largest dimension (which will become SMALL_IMAGE_SCALE_MAX_DIMENSION).
     private static int getAdjustedSmallImageDimension(int currentSize, int largestDimension) {
@@ -54,7 +57,8 @@ public class WallpaperUtils {
 
     // Gets the directory that holds the small images.
     private static File getSmallImagesDir(Context context) {
-        File smallImagesDir = context.getDir(SMALL_IMAGES_DIR, Context.MODE_PRIVATE);
+        File filesDir = context.getFilesDir();
+        File smallImagesDir = new File(filesDir, SMALL_IMAGES_DIR + File.separator);
         if (!smallImagesDir.exists())
             smallImagesDir.mkdirs();
         return smallImagesDir;
@@ -62,7 +66,8 @@ public class WallpaperUtils {
 
     // Gets the directory that holds the large images.
     private static File getLargeImagesDir(Context context) {
-        File largeImagesDir = context.getDir(LARGE_IMAGES_DIR, Context.MODE_PRIVATE);
+        File filesDir = context.getFilesDir();
+        File largeImagesDir = new File(filesDir, LARGE_IMAGES_DIR + File.separator);
         if (!largeImagesDir.exists())
             largeImagesDir.mkdirs();
         return largeImagesDir;
@@ -90,6 +95,12 @@ public class WallpaperUtils {
     // Gets the large image file for a wallpaper.
     private static File getLargeImageFile(Context context, Wallpaper wallpaper) {
         return getFileForImage(getLargeImagesDir(context), wallpaper);
+    }
+
+    // Get the URI for a the wallpapers small image.
+    public static Uri getSmallImageUri(Context context, Wallpaper wallpaper) {
+            // TODO: Error handling if this isn't saved. Throw an exception?
+        return FileProvider.getUriForFile(context, IMAGE_URI_PREFIX, getSmallImageFile(context, wallpaper));
     }
 
     // Stores WallpaperBitmaps in the file system and saves the Wallpaper in the database.

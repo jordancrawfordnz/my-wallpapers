@@ -47,12 +47,13 @@ public class MainActivity extends AppCompatActivity {
                 System.out.println(currentWallpaper.toString());
             }
 
+            Uri smallImageUri = WallpaperUtils.getSmallImageUri(context, wallpapers.get(0));
+            sentImageDisplay.setImageURI(smallImageUri);
         }
     };
 
     // Starts the GetAllWallpapers task.
     private void loadAllWallpapers() {
-        System.out.println("Loading all wallpapers");
         new GetAllWallpapers(this).execute();
     }
 
