@@ -9,8 +9,10 @@ import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
+import com.android.volley.toolbox.ImageLoader;
 import com.android.volley.toolbox.JsonArrayRequest;
 import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.NetworkImageView;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 
@@ -18,15 +20,23 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 
 public class FlickrSearchResultActivity extends AppCompatActivity {
-    public static final String API_KEY = "c4b0bc11e918734dd50f7f0eb21051a5";
+    private static final String API_KEY = "c4b0bc11e918734dd50f7f0eb21051a5";
+    private NetworkImageView networkImageView;
+    private ImageLoader imageLoader;
+    private RequestQueue queue;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_flickr_search_result);
+        networkImageView = (NetworkImageView) findViewById(R.id.flickr_image_preview);
+        queue = FlickrRequestQueue.getInstance(this).getRequestQueue();
+        imageLoader = FlickrRequestQueue.getInstance(this).getImageLoader();
 
         // TODO: Support caching so not continuously doing network requests.
 
@@ -39,8 +49,13 @@ public class FlickrSearchResultActivity extends AppCompatActivity {
             String title = String.format(titleFormat, query);
             getSupportActionBar().setTitle(title);
 
-            RequestQueue queue = Volley.newRequestQueue(this);
-            String requestUrl = "https://api.flickr.com/services/rest/?method=flickr.photos.search&api_key=" + API_KEY + "&text=" + query + "&format=json&nojsoncallback=1";
+            String encodedQuery = null;
+            try {
+                encodedQuery = URLEncoder.encode(query, "utf-8");
+            } catch(UnsupportedEncodingException exception) {
+                // TODO: Handle this error.
+            }
+            String requestUrl = "https://api.flickr.com/services/rest/?method=flickr.photos.search&api_key=" + API_KEY + "&text=" + encodedQuery + "&format=json&nojsoncallback=1";
 
             JsonObjectRequest searchRequest = new JsonObjectRequest(Request.Method.GET, requestUrl, null, new Response.Listener<JSONObject>() {
                 @Override
@@ -64,6 +79,13 @@ public class FlickrSearchResultActivity extends AppCompatActivity {
                             System.out.println(photo.getLargeUrl());
                             System.out.println(photo.getSmallUrl());
                         }
+
+                        FlickrPhoto firstPhoto = flickrPhotos.get(0);
+                        // Display the first photo in the preview.
+                        String url = firstPhoto.getLargeUrl();
+                        imageLoader.get(url, ImageLoader.getImageListener(networkImageView, R.drawable.ic_add_white_24dp, R.drawable.ic_magnify_white_24dp));
+                        networkImageView.setImageUrl(url, imageLoader);
+
                     } catch (JSONException exception) {
                         // Exception occurred while parsing the JSON, display an error.
                         // TODO: Display error.
@@ -72,6 +94,7 @@ public class FlickrSearchResultActivity extends AppCompatActivity {
             }, new Response.ErrorListener() {
                 @Override
                 public void onErrorResponse(VolleyError error) {
+                    error.printStackTrace();
                     System.out.println("Error!");
                 }
             });

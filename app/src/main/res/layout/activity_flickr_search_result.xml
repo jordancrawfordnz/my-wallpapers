@@ -9,4 +9,9 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context=".FlickrSearchResultActivity">
 
+    <com.android.volley.toolbox.NetworkImageView
+        android:id="@+id/flickr_image_preview"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"/>
+
 </RelativeLayout>
