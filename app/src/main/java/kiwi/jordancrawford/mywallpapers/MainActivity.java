@@ -143,7 +143,6 @@ public class MainActivity extends AppCompatActivity {
                 // Set the current wallpaper to persist.
                 new SetCurrentWallpaperTask(this, currentWallpaper).execute(newCurrentWallpaper);
             }
-            newCurrentWallpaper = null;
         }
     }
 
@@ -185,6 +184,13 @@ public class MainActivity extends AppCompatActivity {
                 startActivityForResult(Intent.createChooser(intent, "Select Picture"), PICK_IMAGE_REQUEST);
             }
         });
+    }
+
+    @Override
+    protected void onResume() {
+        // Ensure the time as a wallpaper is up to date.
+        wallpaperRecyclerViewAdapter.notifyDataSetChanged();
+        super.onResume();
     }
 
     // Unregister from local async events.

@@ -67,7 +67,6 @@ public class WallpaperDbHelper extends SQLiteOpenHelper {
     }
 
     // Gets all the wallpapers, with the most commonly used on top.
-        // TODO: Make most commonly used go to the top.
     public ArrayList<Wallpaper> getAllWallpapers() {
         String[] projection = {
                 WallpaperEntry._ID,
@@ -82,7 +81,7 @@ public class WallpaperDbHelper extends SQLiteOpenHelper {
                 null,
                 null,
                 null,
-                null);
+                WallpaperEntry.COLUMN_NAME_IS_CURRENT + " DESC, " + WallpaperEntry.COLUMN_NAME_DAYS_AS_WALLPAPER + " DESC");
         ArrayList<Wallpaper> wallpaperResult = new ArrayList<>();
         if (queryResult.moveToFirst()) {
             do {
