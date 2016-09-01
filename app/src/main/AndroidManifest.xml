@@ -22,6 +22,9 @@
                 <category android:name="android.intent.category.BROWSABLE"></category>
                 <data android:mimeType="image/*"></data>
             </intent-filter>
+
+            <meta-data android:name="android.app.searchable"
+                android:resource="@xml/flickr_search"/>
         </activity>
 
         <provider

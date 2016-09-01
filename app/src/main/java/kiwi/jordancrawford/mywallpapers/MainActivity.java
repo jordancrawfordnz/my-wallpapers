@@ -9,18 +9,16 @@ import android.content.IntentFilter;
 import android.content.res.Configuration;
 import android.net.Uri;
 import android.os.Bundle;
-import android.support.annotation.BoolRes;
-import android.support.design.widget.FloatingActionButton;
 import android.support.v4.content.LocalBroadcastManager;
+import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.SearchView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
-import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.View;
 import android.widget.Toast;
 import java.util.ArrayList;
 
@@ -59,6 +57,10 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void onReceive(Context context, Intent intent) {
             newCurrentWallpaper = intent.getParcelableExtra(WallpaperListAdapter.WALLPAPER_EXTRA);
+
+            if (newCurrentWallpaper == null) {
+                System.out.println("setWallpaperMessageRec ncw is null");
+            }
 
             // Show the wallpaper manager's dialog to set the wallpaper.
             Uri uri = WallpaperUtils.getLargeImageUri(context, newCurrentWallpaper);
@@ -109,6 +111,7 @@ public class MainActivity extends AppCompatActivity {
         public void onReceive(Context context, Intent intent) {
             // Reload the wallpapers to update the newly set wallpaper.
             loadAllWallpapers();
+            Toast.makeText(context, R.string.wallpaper_set, Toast.LENGTH_SHORT).show();
         }
     };
 
@@ -137,6 +140,8 @@ public class MainActivity extends AppCompatActivity {
         MenuInflater inflater = getMenuInflater();
 
         inflater.inflate(R.menu.main_activity_bar, menu);
+        MenuItem searchItem = menu.findItem(R.id.action_search);
+        SearchView searchView = (SearchView) MenuItemCompat.getActionView(searchItem);
         return super.onCreateOptionsMenu(menu);
     }
 
@@ -153,10 +158,6 @@ public class MainActivity extends AppCompatActivity {
                 startActivityForResult(Intent.createChooser(intent, getString(R.string.pick_image_message)), PICK_IMAGE_REQUEST);
                 return true;
             }
-            case R.id.action_add_search: {
-                // TODO: Show search.
-                return true;
-            }
             default:
                 return super.onOptionsItemSelected(item);
         }
@@ -171,7 +172,6 @@ public class MainActivity extends AppCompatActivity {
             new ProcessSentImageTask(this).execute(uri);
         } else if (requestCode == SET_WALLPAPER_REQUEST) {
             if (resultCode == RESULT_OK) {
-                Toast.makeText(this, R.string.wallpaper_set, Toast.LENGTH_SHORT).show();
                 // Set the current wallpaper to persist.
                 new SetCurrentWallpaperTask(this, currentWallpaper).execute(newCurrentWallpaper);
             }

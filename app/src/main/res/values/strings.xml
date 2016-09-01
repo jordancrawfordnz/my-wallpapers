@@ -13,4 +13,6 @@
     <string name="menu_item_add_from_device">Add from device</string>
     <string name="menu_item_add_from_search">Add from Flickr</string>
     <string name="pick_image_message">Add a wallpaper from your device</string>
+    <string name="flickr_search_label">Search Flickr</string>
+    <string name="flickr_search_hint">Search Flickr for a wallpaper</string>
 </resources>
