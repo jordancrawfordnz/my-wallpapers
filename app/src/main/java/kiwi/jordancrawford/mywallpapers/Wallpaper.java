@@ -7,7 +7,8 @@ import android.os.Parcelable;
  * Created by Jordan on 30/08/16.
  */
 public class Wallpaper implements Parcelable {
-    long id = -1;
+    long id = -1, wallpaperSince = -1;
+    boolean isCurrent;
     int daysAsWallpaper = -1;
 
     public long getId() {
@@ -26,10 +27,28 @@ public class Wallpaper implements Parcelable {
         this.daysAsWallpaper = daysAsWallpaper;
     }
 
+    public long getWallpaperSince() {
+        return wallpaperSince;
+    }
+
+    public void setWallpaperSince(long wallpaperSince) {
+        this.wallpaperSince = wallpaperSince;
+    }
+
+    public boolean isCurrent() {
+        return isCurrent;
+    }
+
+    public void setCurrent(boolean current) {
+        isCurrent = current;
+    }
+
     @Override
     public String toString() {
         return "Wallpaper{" +
                 "id=" + id +
+                ", wallpaperSince=" + wallpaperSince +
+                ", isCurrent=" + isCurrent +
                 ", daysAsWallpaper=" + daysAsWallpaper +
                 '}';
     }
@@ -39,6 +58,8 @@ public class Wallpaper implements Parcelable {
     protected Wallpaper(Parcel in) {
         id = in.readLong();
         daysAsWallpaper = in.readInt();
+        isCurrent = in.readByte() != 0;
+        wallpaperSince = in.readLong();
     }
 
     @Override
@@ -50,6 +71,8 @@ public class Wallpaper implements Parcelable {
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeLong(id);
         dest.writeInt(daysAsWallpaper);
+        dest.writeByte((byte) (isCurrent ? 1 : 0));
+        dest.writeLong(wallpaperSince);
     }
 
     @SuppressWarnings("unused")

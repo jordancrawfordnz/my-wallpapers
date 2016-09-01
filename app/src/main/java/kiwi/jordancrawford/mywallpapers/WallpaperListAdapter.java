@@ -67,7 +67,7 @@ public class WallpaperListAdapter extends RecyclerView.Adapter<WallpaperListAdap
 
         public void setupView(final Wallpaper wallpaper) {
             previewImageView.setImageURI(WallpaperUtils.getSmallImageUri(context, wallpaper));
-            daysAsWallpaperView.setText(String.valueOf(wallpaper.getDaysAsWallpaper()));
+            daysAsWallpaperView.setText((wallpaper.isCurrent() ? "x" : " ") + String.valueOf(wallpaper.getDaysAsWallpaper()));
             setButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {

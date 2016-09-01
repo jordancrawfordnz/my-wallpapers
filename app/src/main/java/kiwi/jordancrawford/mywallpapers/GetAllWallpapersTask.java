@@ -16,6 +16,7 @@ import java.util.List;
 public class GetAllWallpapersTask extends AsyncTask<Void, Void, ArrayList<Wallpaper>> {
     public static final String GET_ALL_WALLPAPERS_BROADCAST_INTENT = "get_all_wallpapers_message";
     public static final String ALL_WALLPAPERS_EXTRA = "all_wallpapers";
+    public static final String CURRENT_WALLPAPER_EXTRA = "current_wallpaper";
 
     private Context context;
     public GetAllWallpapersTask(Context context) {
@@ -32,6 +33,7 @@ public class GetAllWallpapersTask extends AsyncTask<Void, Void, ArrayList<Wallpa
         if (result != null) {
             Intent intent = new Intent(GET_ALL_WALLPAPERS_BROADCAST_INTENT);
             intent.putParcelableArrayListExtra(ALL_WALLPAPERS_EXTRA, result);
+            intent.putExtra(CURRENT_WALLPAPER_EXTRA, WallpaperUtils.getCurrentWallpaper(result));
             LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
         }
     }

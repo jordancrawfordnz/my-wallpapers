@@ -9,6 +9,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URI;
+import java.util.ArrayList;
 
 /**
  * Created by Jordan on 31/08/16.
@@ -19,6 +20,8 @@ public class WallpaperUtils {
     private static final String SMALL_IMAGES_DIR = "small_images";
     private static final String LARGE_IMAGES_DIR = "large_images";
     private static final String IMAGE_URI_PREFIX = "kiwi.jordancrawford.mywallpapers";
+    private static final int SECONDS_IN_DAY = 1;
+    private static final int MILLISECONDS_IN_SECOND = 1000;
 
     // Determines the secondary dimension to use when given its current size and the size of the largest dimension (which will become SMALL_IMAGE_SCALE_MAX_DIMENSION).
     private static int getAdjustedSmallImageDimension(int currentSize, int largestDimension) {
@@ -120,6 +123,38 @@ public class WallpaperUtils {
         File smallImage = getSmallImageFile(context, wallpaperToDelete);
         largeImage.delete();
         smallImage.delete();
+    }
+
+    // Determines the current wallpaper from a list of wallpapers. May return a Wallpaper or null.
+    public static Wallpaper getCurrentWallpaper(ArrayList<Wallpaper> allWallpapers) {
+        Wallpaper currentWallpaper = null;
+        for (Wallpaper wallpaper : allWallpapers) {
+            if (wallpaper.isCurrent()) {
+                currentWallpaper = wallpaper;
+                break;
+            }
+        }
+        return currentWallpaper;
+    }
+
+    // Updates the current wallpaper to reflect that is is no longer current and updates its time as wallpaper.
+    // Updates the new wallpaper to be current.
+    public static void setNewWallpaper(Context context, Wallpaper currentWallpaper, Wallpaper newWallpaper) {
+        long timeNowInSeconds = System.currentTimeMillis() / MILLISECONDS_IN_SECOND;
+
+        // Update the current wallpaper to be non-current (if it is set).
+        if (currentWallpaper != null) {
+            long timeSinceSetAsWallpaper = timeNowInSeconds - currentWallpaper.getWallpaperSince();
+            int extraDaysAsWallpaper = (int) timeSinceSetAsWallpaper / SECONDS_IN_DAY;
+            currentWallpaper.setDaysAsWallpaper(currentWallpaper.getDaysAsWallpaper() + extraDaysAsWallpaper);
+            currentWallpaper.setCurrent(false);
+            currentWallpaper.setWallpaperSince(-1);
+            WallpaperDbHelper.getInstance(context).updateWallpaper(currentWallpaper);
+        }
+
+        newWallpaper.setCurrent(true);
+        newWallpaper.setWallpaperSince(timeNowInSeconds);
+        WallpaperDbHelper.getInstance(context).updateWallpaper(newWallpaper);
     }
 
     // Stores WallpaperBitmaps in the file system and saves the Wallpaper in the database.

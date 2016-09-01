@@ -5,12 +5,9 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-
 import java.util.ArrayList;
-import java.util.List;
 
 import static kiwi.jordancrawford.mywallpapers.WallpaperContract.WallpaperEntry;
-import static kiwi.jordancrawford.mywallpapers.WallpaperContract.ConfigEntry;
 
 /**
  * Created by Jordan on 30/08/16.
@@ -22,18 +19,11 @@ public class WallpaperDbHelper extends SQLiteOpenHelper {
     private static final String SQL_CREATE_TABLE_WALLPAPERS =
             "CREATE TABLE " + WallpaperEntry.TABLE_NAME + "("
             + WallpaperEntry._ID + " " + ID_PROPERTIES + ","
-            + WallpaperEntry.COLUMN_NAME_DAYS_AS_WALLPAPER + " " + WallpaperEntry.COLUMN_NAME_DAYS_AS_WALLPAPER_TYPE + ")";
+            + WallpaperEntry.COLUMN_NAME_DAYS_AS_WALLPAPER + " " + WallpaperEntry.COLUMN_NAME_DAYS_AS_WALLPAPER_TYPE + ","
+            + WallpaperEntry.COLUMN_NAME_IS_CURRENT + " " + WallpaperEntry.COLUMN_NAME_IS_CURRENT + ","
+            + WallpaperEntry.COLUMN_NAME_WALLPAPER_SINCE + " " + WallpaperEntry.COLUMN_NAME_WALLPAPER_SINCE_TYPE + ")";
     private static final String SQL_DROP_TABLE_WALLPAPERS =
             "DROP TABLE IF EXISTS " + WallpaperEntry.TABLE_NAME;
-
-    private static final String SQL_CREATE_TABLE_CONFIG =
-            "CREATE TABLE " + ConfigEntry.TABLE_NAME + "("
-            + ConfigEntry._ID + " " + ID_PROPERTIES + ","
-            + ConfigEntry.COLUMN_NAME_CURRENT_WALLPAPER + " " + ConfigEntry.COLUMN_NAME_CURRENT_WALLPAPER_TYPE + ","
-            + ConfigEntry.COLUMN_NAME_SET_WALLPAPER_DATE + " " + ConfigEntry.COLUMN_NAME_SET_WALLPAPER_DATE_TYPE + ")";
-    private static final String SQL_DROP_TABLE_CONFIG =
-            "DROP TABLE IF EXISTS " + ConfigEntry.TABLE_NAME;
-
 
     public static final int DATABASE_VERSION = 1;
     public static final String DATABASE_NAME = "wallpapers.db";
@@ -46,7 +36,7 @@ public class WallpaperDbHelper extends SQLiteOpenHelper {
      */
     public static WallpaperDbHelper getInstance(Context context) {
         if (instance == null) {
-            // Instantiate with the application context so the activity context isn't leacked.
+            // Instantiate with the application context so the activity context isn't leaked.
             instance = new WallpaperDbHelper(context.getApplicationContext());
         }
         return instance;
@@ -56,34 +46,34 @@ public class WallpaperDbHelper extends SQLiteOpenHelper {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
     }
 
+    private ContentValues getWallpaperFields(Wallpaper wallpaper) {
+        ContentValues values = new ContentValues();
+        values.put(WallpaperEntry.COLUMN_NAME_DAYS_AS_WALLPAPER, wallpaper.getDaysAsWallpaper());
+        values.put(WallpaperEntry.COLUMN_NAME_IS_CURRENT, wallpaper.isCurrent());
+        values.put(WallpaperEntry.COLUMN_NAME_WALLPAPER_SINCE, wallpaper.getWallpaperSince());
+        return values;
+    }
+
     @Override
     public void onCreate(SQLiteDatabase db) {
-        db.execSQL(SQL_CREATE_TABLE_CONFIG);
         db.execSQL(SQL_CREATE_TABLE_WALLPAPERS);
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         // If the schema changes, just delete everything and re-create it.
-        db.execSQL(SQL_DROP_TABLE_CONFIG);
         db.execSQL(SQL_DROP_TABLE_WALLPAPERS);
         onCreate(db);
     }
 
-    // TODO: Fill this in!
-//    public Wallpaper getConfig() {
-//        // Will return an empty Config if none exists.
-//    }
-//
-//    // Adds or updates the config.
-//    public void setConfig(Config newConfig) {
-//
-//    }
-
+    // Gets all the wallpapers, with the most commonly used on top.
+        // TODO: Make most commonly used go to the top.
     public ArrayList<Wallpaper> getAllWallpapers() {
         String[] projection = {
                 WallpaperEntry._ID,
                 WallpaperEntry.COLUMN_NAME_DAYS_AS_WALLPAPER,
+                WallpaperEntry.COLUMN_NAME_IS_CURRENT,
+                WallpaperEntry.COLUMN_NAME_WALLPAPER_SINCE
         };
         Cursor queryResult = getReadableDatabase().query(
                 WallpaperEntry.TABLE_NAME,
@@ -99,17 +89,13 @@ public class WallpaperDbHelper extends SQLiteOpenHelper {
                 Wallpaper currentWallpaper = new Wallpaper();
                 currentWallpaper.setId(queryResult.getInt(0));
                 currentWallpaper.setDaysAsWallpaper(queryResult.getInt(1));
+                currentWallpaper.setCurrent(queryResult.getInt(2) == 1);
+                currentWallpaper.setWallpaperSince(queryResult.getLong(3));
                 wallpaperResult.add(currentWallpaper);
             } while (queryResult.moveToNext());
         }
         queryResult.close();
         return wallpaperResult;
-    }
-
-    private ContentValues getWallpaperFields(Wallpaper wallpaper) {
-        ContentValues values = new ContentValues();
-        values.put(WallpaperEntry.COLUMN_NAME_DAYS_AS_WALLPAPER, wallpaper.getDaysAsWallpaper());
-        return values;
     }
 
     // Adds a wallpaper.
@@ -137,7 +123,7 @@ public class WallpaperDbHelper extends SQLiteOpenHelper {
         return updateResult == 1;
     }
 
-    // Deletes the wallpaper. True if deleted, false if an error occured.
+    // Deletes the wallpaper. True if deleted, false if an error occurred.
     public boolean deleteWallpaper(Wallpaper toDelete) {
         if (toDelete.getId() == -1) {
             throw new IllegalArgumentException(NO_ID_EXCEPTION_MESSAGE);
