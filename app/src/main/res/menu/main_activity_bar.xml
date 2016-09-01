@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:mywallpapers="http://schemas.android.com/apk/res-auto"
+    tools:context="kiwi.jordancrawford.mywallpapers.MainActivity">
+    <item android:id="@+id/action_add_local"
+        android:title="@string/menu_item_add_from_device"
+        android:icon="@drawable/ic_add_white_24dp"
+        mywallpapers:showAsAction="always"/>
+    <item android:id="@+id/action_add_search"
+        android:title="@string/menu_item_add_from_search"
+        android:icon="@drawable/ic_magnify_white_24dp"
+        mywallpapers:showAsAction="always"/>
+</menu>

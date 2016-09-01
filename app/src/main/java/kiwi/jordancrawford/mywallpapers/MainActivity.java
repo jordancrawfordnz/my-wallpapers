@@ -17,6 +17,9 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.support.v7.widget.Toolbar;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
 import java.util.ArrayList;
@@ -128,15 +131,44 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    // Inflate the action bar menu's options.
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+
+        inflater.inflate(R.menu.main_activity_bar, menu);
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    // Handle actions in the action bar.
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.action_add_local: {
+                // Open the dialog to pick content from other applications.
+
+                Intent intent = new Intent();
+                intent.setType("image/*");
+                intent.setAction(Intent.ACTION_GET_CONTENT);
+                startActivityForResult(Intent.createChooser(intent, getString(R.string.pick_image_message)), PICK_IMAGE_REQUEST);
+                return true;
+            }
+            case R.id.action_add_search: {
+                // TODO: Show search.
+                return true;
+            }
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == PICK_IMAGE_REQUEST && resultCode == RESULT_OK && data != null && data.getData() != null) {
-            // TODO: Turn this into add wallpaper.
-
+            // Add the content.
             Uri uri = data.getData();
-            Intent changeWallpaperIntent = WallpaperManager.getInstance(this).getCropAndSetWallpaperIntent(uri);
-            startActivityForResult(changeWallpaperIntent, SET_WALLPAPER_REQUEST);
+            new ProcessSentImageTask(this).execute(uri);
         } else if (requestCode == SET_WALLPAPER_REQUEST) {
             if (resultCode == RESULT_OK) {
                 Toast.makeText(this, R.string.wallpaper_set, Toast.LENGTH_SHORT).show();
@@ -150,8 +182,6 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
 
         LocalBroadcastManager.getInstance(this).registerReceiver(wallpaperAddedMessageReceiver, new IntentFilter(ProcessSentImageTask.WALLPAPER_ADDED_BROADCAST_INTENT));
         LocalBroadcastManager.getInstance(this).registerReceiver(getAllWallpaperMessageReceiver, new IntentFilter(GetAllWallpapersTask.GET_ALL_WALLPAPERS_BROADCAST_INTENT));
@@ -171,19 +201,6 @@ public class MainActivity extends AppCompatActivity {
         wallpaperRecyclerView.setLayoutManager(wallpaperRecyclerViewLayoutManager);
         wallpaperRecyclerViewAdapter = new WallpaperListAdapter(this, wallpapers);
         wallpaperRecyclerView.setAdapter(wallpaperRecyclerViewAdapter);
-
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent = new Intent();
-                // Show only images, no videos or anything else
-                intent.setType("image/*");
-                intent.setAction(Intent.ACTION_GET_CONTENT);
-                // Always show the chooser (if there are multiple options available)
-                startActivityForResult(Intent.createChooser(intent, "Select Picture"), PICK_IMAGE_REQUEST);
-            }
-        });
     }
 
     @Override
