@@ -22,7 +22,7 @@ public class FlickrRequestQueue {
     private static Context context;
     private RequestQueue requestQueue;
     private ImageLoader imageLoader;
-    private static final int CACHE_SIZE = 10 * 1024 * 1024; // 10MB
+    private static final int CACHE_SIZE = 30 * 1024 * 1024; // 30MB
     private static final int IMAGES_TO_CACHE = 20;
 
     private FlickrRequestQueue(Context context) {

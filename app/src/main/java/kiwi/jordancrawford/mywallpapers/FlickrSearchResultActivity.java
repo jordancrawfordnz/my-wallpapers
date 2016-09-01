@@ -56,8 +56,7 @@ public class FlickrSearchResultActivity extends AppCompatActivity {
                 // TODO: Handle this error.
             }
             String requestUrl = "https://api.flickr.com/services/rest/?method=flickr.photos.search&api_key=" + API_KEY + "&text=" + encodedQuery + "&format=json&nojsoncallback=1";
-
-            JsonObjectRequest searchRequest = new JsonObjectRequest(Request.Method.GET, requestUrl, null, new Response.Listener<JSONObject>() {
+            JsonObjectRequest searchRequest = new CachedJsonObjectRequest(Request.Method.GET, requestUrl, null, new Response.Listener<JSONObject>() {
                 @Override
                 public void onResponse(JSONObject response) {
                     try {
@@ -74,10 +73,6 @@ public class FlickrSearchResultActivity extends AppCompatActivity {
                             photo.setSecret(photoObject.getString("secret"));
                             photo.setServerId(photoObject.getString("server"));
                             flickrPhotos.add(photo);
-
-                            System.out.println(photo);
-                            System.out.println(photo.getLargeUrl());
-                            System.out.println(photo.getSmallUrl());
                         }
 
                         FlickrPhoto firstPhoto = flickrPhotos.get(0);
