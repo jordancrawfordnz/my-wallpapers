@@ -125,6 +125,19 @@ public class WallpaperUtils {
         smallImage.delete();
     }
 
+    public static int getActualDaysAsWallpaper(Wallpaper wallpaper) {
+        // If not current, then zero days since set.
+        if (!wallpaper.isCurrent()) {
+            return wallpaper.getDaysAsWallpaper();
+        }
+
+        // If current, include the time right up until now.
+        long timeNowInSeconds = System.currentTimeMillis() / MILLISECONDS_IN_SECOND;
+        long timeSinceSetAsWallpaper = timeNowInSeconds - wallpaper.getWallpaperSince();
+        int extraDaysAsWallpaper = (int) timeSinceSetAsWallpaper / SECONDS_IN_DAY;
+        return wallpaper.getDaysAsWallpaper() + extraDaysAsWallpaper;
+    }
+
     // Determines the current wallpaper from a list of wallpapers. May return a Wallpaper or null.
     public static Wallpaper getCurrentWallpaper(ArrayList<Wallpaper> allWallpapers) {
         Wallpaper currentWallpaper = null;
@@ -140,19 +153,16 @@ public class WallpaperUtils {
     // Updates the current wallpaper to reflect that is is no longer current and updates its time as wallpaper.
     // Updates the new wallpaper to be current.
     public static void setNewWallpaper(Context context, Wallpaper currentWallpaper, Wallpaper newWallpaper) {
-        long timeNowInSeconds = System.currentTimeMillis() / MILLISECONDS_IN_SECOND;
-
         // Update the current wallpaper to be non-current (if it is set).
         if (currentWallpaper != null) {
-            long timeSinceSetAsWallpaper = timeNowInSeconds - currentWallpaper.getWallpaperSince();
-            int extraDaysAsWallpaper = (int) timeSinceSetAsWallpaper / SECONDS_IN_DAY;
-            currentWallpaper.setDaysAsWallpaper(currentWallpaper.getDaysAsWallpaper() + extraDaysAsWallpaper);
+            currentWallpaper.setDaysAsWallpaper(getActualDaysAsWallpaper(currentWallpaper));
             currentWallpaper.setCurrent(false);
             currentWallpaper.setWallpaperSince(-1);
             WallpaperDbHelper.getInstance(context).updateWallpaper(currentWallpaper);
         }
 
         newWallpaper.setCurrent(true);
+        long timeNowInSeconds = System.currentTimeMillis() / MILLISECONDS_IN_SECOND;
         newWallpaper.setWallpaperSince(timeNowInSeconds);
         WallpaperDbHelper.getInstance(context).updateWallpaper(newWallpaper);
     }
