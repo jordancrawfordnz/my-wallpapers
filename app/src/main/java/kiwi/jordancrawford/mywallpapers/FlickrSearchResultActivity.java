@@ -38,13 +38,14 @@ import java.util.ArrayList;
 
 public class FlickrSearchResultActivity extends AppCompatActivity {
     private static final String API_KEY = "c4b0bc11e918734dd50f7f0eb21051a5";
-    private NetworkImageView networkImageView;
+    private static final String DOWNLOADED_PHOTO_IDS_KEY = "downloaded_photo_ids";
     private ImageLoader imageLoader;
     private RequestQueue queue;
     private RecyclerView recyclerView;
     private RecyclerView.LayoutManager recyclerViewLayoutManager;
     private RecyclerView.Adapter recyclerViewAdapter;
     private ArrayList<FlickrPhoto> photos = new ArrayList<>();
+    private ArrayList<String> downloadedPhotoIds;
     private LinearLayoutCompat noFlickrResultsMessage;
     private ProgressBar loadingSpinner;
 
@@ -110,6 +111,13 @@ public class FlickrSearchResultActivity extends AppCompatActivity {
         loadingSpinner = (ProgressBar) findViewById(R.id.loading_spinner);
         loadingSpinner.isIndeterminate();
 
+        if (savedInstanceState != null) {
+            downloadedPhotoIds = savedInstanceState.getStringArrayList(DOWNLOADED_PHOTO_IDS_KEY);
+        }
+        if (downloadedPhotoIds == null) {
+            downloadedPhotoIds = new ArrayList<>();
+        }
+
         LocalBroadcastManager.getInstance(this).registerReceiver(addFlickrPhotoMessageReceiver, new IntentFilter(FlickrPreviewListAdapter.ADD_FLICKR_PHOTO));
 
         recyclerView = (RecyclerView) findViewById(R.id.flickr_preview_recycler_view);
@@ -117,7 +125,7 @@ public class FlickrSearchResultActivity extends AppCompatActivity {
         int numberOfColumns = deviceOrientation == Configuration.ORIENTATION_LANDSCAPE ? 3 : 2;
         recyclerViewLayoutManager = new GridLayoutManager(this, numberOfColumns);
         recyclerView.setLayoutManager(recyclerViewLayoutManager);
-        recyclerViewAdapter = new FlickrPreviewListAdapter(this, photos, imageLoader);
+        recyclerViewAdapter = new FlickrPreviewListAdapter(this, photos, downloadedPhotoIds, imageLoader);
         recyclerView.setAdapter(recyclerViewAdapter);
 
         // Get the intent for the query.
@@ -190,5 +198,11 @@ public class FlickrSearchResultActivity extends AppCompatActivity {
     protected void onDestroy() {
         LocalBroadcastManager.getInstance(this).unregisterReceiver(addFlickrPhotoMessageReceiver);
         super.onDestroy();
+    }
+
+
+    @Override
+    protected void onSaveInstanceState (Bundle outState) {
+        outState.putStringArrayList(DOWNLOADED_PHOTO_IDS_KEY, downloadedPhotoIds);
     }
 }
