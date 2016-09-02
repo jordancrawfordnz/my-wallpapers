@@ -4,4 +4,6 @@
     <color name="colorPrimaryDark">#0288D1</color>
     <color name="colorAccent">#7C4DFF</color>
     <color name="flickr_results_background">#FFF</color>
+    <color name="delete_button_colour">#c60303</color>
+    <color name="days_as_wallpaper_text_colour">#000</color>
 </resources>

@@ -7,7 +7,16 @@
     <!-- Wallpaper Card -->
     <dimen name="wallpaper_card_margin">10dp</dimen>
     <dimen name="wallpaper_card_image_height">200dp</dimen>
-    <dimen name="wallpaper_card_days_size">20sp</dimen>
+    <dimen name="wallpaper_card_days_size">18sp</dimen>
+    <dimen name="wallpaper_card_time_icon_height">18dp</dimen>
+    <dimen name="wallpaper_card_time_icon_margin_right">5dp</dimen>
+    <dimen name="wallpaper_is_current_icon_width">24dp</dimen>
+    <dimen name="wallpaper_card_topline_height">24dp</dimen>
+    <dimen name="wallpaper_card_topline_margin_top">10dp</dimen>
+    <dimen name="wallpaper_card_time_margin_top">4dp</dimen>
+    <dimen name="wallpaper_card_time_margin_left">17dp</dimen>
+    <dimen name="wallpaper_card_is_current_margin_right">30dp</dimen>
+
 
     <!-- Flickr Preview -->
     <dimen name="flickr_preview_height">200dp</dimen>

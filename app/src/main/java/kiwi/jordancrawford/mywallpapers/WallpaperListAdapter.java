@@ -51,6 +51,7 @@ public class WallpaperListAdapter extends RecyclerView.Adapter<WallpaperListAdap
     public class WallpaperViewHolder extends RecyclerView.ViewHolder {
         private View view;
         private ImageView previewImageView;
+        private ImageView wallpaperIsCurrentImageView;
         private TextView daysAsWallpaperView;
         private Button deleteButton;
         private Button setButton;
@@ -63,11 +64,29 @@ public class WallpaperListAdapter extends RecyclerView.Adapter<WallpaperListAdap
             this.daysAsWallpaperView = (TextView) view.findViewById(R.id.wallpaper_days_as_wallpaper);
             this.setButton = (Button) view.findViewById(R.id.wallpaper_card_set_button);
             this.deleteButton = (Button) view.findViewById(R.id.wallpaper_card_delete_button);
+            this.wallpaperIsCurrentImageView = (ImageView) view.findViewById(R.id.wallpaper_is_current);
         }
 
         public void setupView(final Wallpaper wallpaper) {
             previewImageView.setImageURI(WallpaperUtils.getSmallImageUri(context, wallpaper));
-            daysAsWallpaperView.setText((wallpaper.isCurrent() ? "x" : " ") + WallpaperUtils.getActualDaysAsWallpaper(wallpaper));
+
+            String daysAsWallpaperText;
+            if (wallpaper.getDaysAsWallpaper() == 0 && !wallpaper.isCurrent()) {
+                // Use the never text.
+                daysAsWallpaperText = context.getResources().getString(R.string.time_as_wallpaper_never);
+            } else {
+                // Use the day display text.
+                String format = context.getResources().getString(R.string.time_as_wallpaper_days);
+                daysAsWallpaperText = String.format(format, WallpaperUtils.getActualDaysAsWallpaper(wallpaper));
+            }
+            daysAsWallpaperView.setText(daysAsWallpaperText);
+
+            if (wallpaper.isCurrent()) {
+                wallpaperIsCurrentImageView.setImageResource(R.drawable.ic_check_black_24dp);
+            } else {
+                wallpaperIsCurrentImageView.setImageResource(R.drawable.blank);
+            }
+
             setButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
@@ -76,6 +95,7 @@ public class WallpaperListAdapter extends RecyclerView.Adapter<WallpaperListAdap
                     LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
                 }
             });
+            setButton.setEnabled(!wallpaper.isCurrent);
 
             deleteButton.setOnClickListener(new View.OnClickListener() {
                 @Override
