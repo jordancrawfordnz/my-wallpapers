@@ -11,7 +11,6 @@ import android.content.res.Configuration;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.content.LocalBroadcastManager;
-import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
@@ -30,6 +29,9 @@ public class MainActivity extends AppCompatActivity {
     private final int PICK_IMAGE_REQUEST = 1;
     private final int SET_WALLPAPER_REQUEST = 2;
     private final String INTENT_USED_KEY = "used";
+    private final String NEW_CURRENT_WALLPAPER_KEY = "new_current_wallpaper";
+    private final String CURRENT_WALLPAPER_KEY = "current_wallpaper";
+
     private ArrayList<Wallpaper> wallpapers = new ArrayList<>();
     private Wallpaper currentWallpaper = null;
     private Wallpaper newCurrentWallpaper = null; // to be used only while in the process of changing the current wallpaper.
@@ -75,10 +77,6 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void onReceive(Context context, Intent intent) {
             newCurrentWallpaper = intent.getParcelableExtra(WallpaperListAdapter.WALLPAPER_EXTRA);
-
-            if (newCurrentWallpaper == null) {
-                System.out.println("setWallpaperMessageRec ncw is null");
-            }
 
             // Show the wallpaper manager's dialog to set the wallpaper.
             Uri uri = WallpaperUtils.getLargeImageUri(context, newCurrentWallpaper);
@@ -203,6 +201,12 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        // Restore the newCurrentWallpaper and currentWallpaper.
+        if (savedInstanceState != null) {
+            newCurrentWallpaper = savedInstanceState.getParcelable(NEW_CURRENT_WALLPAPER_KEY);
+            currentWallpaper = savedInstanceState.getParcelable(CURRENT_WALLPAPER_KEY);
+        }
+
         LocalBroadcastManager.getInstance(this).registerReceiver(wallpaperAddedMessageReceiver, new IntentFilter(ProcessSentImageTask.WALLPAPER_ADDED_BROADCAST_INTENT));
         LocalBroadcastManager.getInstance(this).registerReceiver(getAllWallpaperMessageReceiver, new IntentFilter(GetAllWallpapersTask.GET_ALL_WALLPAPERS_BROADCAST_INTENT));
         LocalBroadcastManager.getInstance(this).registerReceiver(setWallpaperMessageReceiver, new IntentFilter(WallpaperListAdapter.SET_WALLPAPER_BROADCAST_INTENT));
@@ -249,6 +253,13 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onNewIntent(Intent intent) {
         processIntent(intent);
+    }
+
+    @Override
+    protected void onSaveInstanceState (Bundle outState) {
+        // Save the newCurrentWallpaper and currentWallpaper.
+        outState.putParcelable(NEW_CURRENT_WALLPAPER_KEY, newCurrentWallpaper);
+        outState.putParcelable(CURRENT_WALLPAPER_KEY, currentWallpaper);
     }
 
 }

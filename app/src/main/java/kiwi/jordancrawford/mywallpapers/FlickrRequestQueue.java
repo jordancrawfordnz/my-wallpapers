@@ -22,8 +22,8 @@ public class FlickrRequestQueue {
     private static Context context;
     private RequestQueue requestQueue;
     private ImageLoader imageLoader;
-    private static final int CACHE_SIZE = 30 * 1024 * 1024; // 30MB
-    private static final int IMAGES_TO_CACHE = 20;
+    private static final int CACHE_SIZE = 50 * 1024 * 1024; // 50MB
+    private static final int IMAGES_TO_CACHE = 100;
 
     private FlickrRequestQueue(Context context) {
         this.context = context.getApplicationContext();
