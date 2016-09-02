@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@color/flickr_results_background">
+
+    <com.android.volley.toolbox.NetworkImageView
+        android:layout_margin="@dimen/flickr_preview_image_margin"
+        android:id="@+id/flickr_preview_image"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/flickr_preview_height"
+        android:scaleType="centerCrop"/>
+
+</LinearLayout>

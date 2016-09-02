@@ -42,7 +42,6 @@ public class FlickrRequestQueue {
 
             @Override
             public Bitmap getBitmap(String url) {
-                System.out.println("Resolving image from cache");
                 return cache.get(url);
             }
 

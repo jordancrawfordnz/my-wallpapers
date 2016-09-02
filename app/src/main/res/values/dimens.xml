@@ -8,4 +8,8 @@
     <dimen name="wallpaper_card_margin">10dp</dimen>
     <dimen name="wallpaper_card_image_height">200dp</dimen>
     <dimen name="wallpaper_card_days_size">20sp</dimen>
+
+    <!-- Flickr Preview -->
+    <dimen name="flickr_preview_height">200dp</dimen>
+    <dimen name="flickr_preview_image_margin">4dp</dimen>
 </resources>

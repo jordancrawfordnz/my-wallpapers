@@ -4,6 +4,8 @@ import android.app.SearchManager;
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.GridLayoutManager;
+import android.support.v7.widget.RecyclerView;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
@@ -29,14 +31,22 @@ public class FlickrSearchResultActivity extends AppCompatActivity {
     private NetworkImageView networkImageView;
     private ImageLoader imageLoader;
     private RequestQueue queue;
+    private RecyclerView recyclerView;
+    private RecyclerView.LayoutManager recyclerViewLayoutManager;
+    private RecyclerView.Adapter recyclerViewAdapter;
+    private ArrayList<FlickrPhoto> photos = new ArrayList<>();
 
-    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_flickr_search_result);
-        networkImageView = (NetworkImageView) findViewById(R.id.flickr_image_preview);
         queue = FlickrRequestQueue.getInstance(this).getRequestQueue();
         imageLoader = FlickrRequestQueue.getInstance(this).getImageLoader();
+
+        recyclerView = (RecyclerView) findViewById(R.id.flickr_preview_recycler_view);
+        recyclerViewLayoutManager = new GridLayoutManager(this, 2);
+        recyclerView.setLayoutManager(recyclerViewLayoutManager);
+        recyclerViewAdapter = new FlickrPreviewListAdapter(photos, imageLoader);
+        recyclerView.setAdapter(recyclerViewAdapter);
 
         // TODO: Support caching so not continuously doing network requests.
 
@@ -60,7 +70,7 @@ public class FlickrSearchResultActivity extends AppCompatActivity {
                 @Override
                 public void onResponse(JSONObject response) {
                     try {
-                        ArrayList<FlickrPhoto> flickrPhotos = new ArrayList<>();
+                        photos.clear();
                         JSONObject photosObject = response.getJSONObject("photos");
                         JSONArray photoArray = photosObject.getJSONArray("photo");
                         for (int photoIndex = 0; photoIndex < photoArray.length(); photoIndex++) {
@@ -72,15 +82,9 @@ public class FlickrSearchResultActivity extends AppCompatActivity {
                             photo.setFarmId(photoObject.getString("farm"));
                             photo.setSecret(photoObject.getString("secret"));
                             photo.setServerId(photoObject.getString("server"));
-                            flickrPhotos.add(photo);
+                            photos.add(photo);
                         }
-
-                        FlickrPhoto firstPhoto = flickrPhotos.get(0);
-                        // Display the first photo in the preview.
-                        String url = firstPhoto.getLargeUrl();
-                        imageLoader.get(url, ImageLoader.getImageListener(networkImageView, R.drawable.ic_add_white_24dp, R.drawable.ic_magnify_white_24dp));
-                        networkImageView.setImageUrl(url, imageLoader);
-
+                        recyclerViewAdapter.notifyDataSetChanged();
                     } catch (JSONException exception) {
                         // Exception occurred while parsing the JSON, display an error.
                         // TODO: Display error.
