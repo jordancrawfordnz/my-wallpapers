@@ -42,6 +42,13 @@ public class MainActivity extends AppCompatActivity {
         }
     };
 
+    private BroadcastReceiver wallpaperDownloadedMessageReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            loadAllWallpapers();
+        }
+    };
+
     private BroadcastReceiver getAllWallpaperMessageReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -139,7 +146,6 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
-
         inflater.inflate(R.menu.main_activity_bar, menu);
         MenuItem searchItem = menu.findItem(R.id.action_search);
         SearchView searchView = (SearchView) menu.findItem(R.id.action_search).getActionView();
@@ -193,6 +199,7 @@ public class MainActivity extends AppCompatActivity {
         LocalBroadcastManager.getInstance(this).registerReceiver(deleteWallpaperMessageReceiver, new IntentFilter(WallpaperListAdapter.DELETE_WALLPAPER_BROADCAST_INTENT));
         LocalBroadcastManager.getInstance(this).registerReceiver(wallpaperDeletedMessageReceiver, new IntentFilter(DeleteWallpaperTask.WALLPAPER_DELETED_BROADCAST_INTENT));
         LocalBroadcastManager.getInstance(this).registerReceiver(wallpaperSetCompleteMessageReceiver, new IntentFilter(SetCurrentWallpaperTask.WALLPAPER_SET_COMPLETE_BROADCAST_INTENT));
+        LocalBroadcastManager.getInstance(this).registerReceiver(wallpaperDownloadedMessageReceiver, new IntentFilter(ProcessDownloadedWallpaperTask.WALLPAPER_DOWNLOADED_BROADCAST_INTENT));
 
         processIntent(getIntent());
         loadAllWallpapers();
@@ -223,6 +230,7 @@ public class MainActivity extends AppCompatActivity {
         LocalBroadcastManager.getInstance(this).unregisterReceiver(deleteWallpaperMessageReceiver);
         LocalBroadcastManager.getInstance(this).unregisterReceiver(wallpaperDeletedMessageReceiver);
         LocalBroadcastManager.getInstance(this).unregisterReceiver(wallpaperSetCompleteMessageReceiver);
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(wallpaperDownloadedMessageReceiver);
         super.onDestroy();
     }
 

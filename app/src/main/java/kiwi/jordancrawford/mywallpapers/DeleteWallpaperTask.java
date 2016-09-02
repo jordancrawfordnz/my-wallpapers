@@ -9,7 +9,7 @@ import android.support.v4.content.LocalBroadcastManager;
 /**
  * Created by Jordan on 31/08/16.
  */
-public class DeleteWallpaperTask  extends AsyncTask<Wallpaper, Void, Void> {
+public class DeleteWallpaperTask extends AsyncTask<Wallpaper, Void, Void> {
     public static final String WALLPAPER_DELETED_BROADCAST_INTENT = "wallpaper_deleted_message";
     private Context context;
 

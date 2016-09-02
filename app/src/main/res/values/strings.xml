@@ -16,4 +16,12 @@
     <string name="flickr_search_label">Search Flickr</string>
     <string name="flickr_search_hint">Search Flickr for a wallpaper</string>
     <string name="flickr_search_results_title">Search Flickr for \"%1$s\"</string>
+    <string name="flickr_json_exception">Could not parse Flickr result.</string>
+    <string name="flickr_search_error">Got an error while searching Flickr</string>
+    <string name="flickr_unsupported_encoding_error">Unable to encode the Flickr URL</string>
+    <string name="flickr_get_small_image_error">Unable to download small image from Flickr</string>
+    <string name="flickr_get_large_image_error">Unable to download large image from Flickr</string>
+    <string name="flickr_image_downloaded">Added new wallpaper from Flickr</string>
+    <string name="flickr_processing_failed">Processing the image from Flickr failed</string>
+    <string name="flickr_download_started">Downloading wallpaper from Flickr</string>
 </resources>

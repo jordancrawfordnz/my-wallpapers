@@ -5,6 +5,8 @@ import android.graphics.Bitmap;
 import android.net.Uri;
 import android.support.v4.content.FileProvider;
 
+import com.android.volley.toolbox.ImageLoader;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;

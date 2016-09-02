@@ -1,9 +1,12 @@
 package kiwi.jordancrawford.mywallpapers;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 /**
  * Created by Jordan on 1/09/16.
  */
-public class FlickrPhoto {
+public class FlickrPhoto implements Parcelable {
     String id, farmId, serverId, secret;
 
     @Override
@@ -22,6 +25,10 @@ public class FlickrPhoto {
 
     public String getSmallUrl() {
         return getBaseUrl() + ".jpg";
+    }
+
+    public String getThumbnailUrl() {
+        return getBaseUrl() + "_n.jpg";
     }
 
     public String getLargeUrl() {
@@ -59,4 +66,39 @@ public class FlickrPhoto {
     public void setSecret(String secret) {
         this.secret = secret;
     }
+
+    public FlickrPhoto() {}
+
+    protected FlickrPhoto(Parcel in) {
+        id = in.readString();
+        farmId = in.readString();
+        serverId = in.readString();
+        secret = in.readString();
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(id);
+        dest.writeString(farmId);
+        dest.writeString(serverId);
+        dest.writeString(secret);
+    }
+
+    @SuppressWarnings("unused")
+    public static final Parcelable.Creator<FlickrPhoto> CREATOR = new Parcelable.Creator<FlickrPhoto>() {
+        @Override
+        public FlickrPhoto createFromParcel(Parcel in) {
+            return new FlickrPhoto(in);
+        }
+
+        @Override
+        public FlickrPhoto[] newArray(int size) {
+            return new FlickrPhoto[size];
+        }
+    };
 }
