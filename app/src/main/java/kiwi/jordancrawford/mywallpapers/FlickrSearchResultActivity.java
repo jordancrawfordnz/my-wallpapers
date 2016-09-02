@@ -11,7 +11,10 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
+import android.support.v7.widget.LinearLayoutCompat;
 import android.support.v7.widget.RecyclerView;
+import android.view.View;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.android.volley.Request;
@@ -42,6 +45,8 @@ public class FlickrSearchResultActivity extends AppCompatActivity {
     private RecyclerView.LayoutManager recyclerViewLayoutManager;
     private RecyclerView.Adapter recyclerViewAdapter;
     private ArrayList<FlickrPhoto> photos = new ArrayList<>();
+    private LinearLayoutCompat noFlickrResultsMessage;
+    private ProgressBar loadingSpinner;
 
     private BroadcastReceiver addFlickrPhotoMessageReceiver = new BroadcastReceiver() {
         @Override
@@ -92,9 +97,6 @@ public class FlickrSearchResultActivity extends AppCompatActivity {
                     Toast.makeText(FlickrSearchResultActivity.this, R.string.flickr_get_small_image_error, Toast.LENGTH_SHORT).show();
                 }
             });
-
-
-            System.out.println(photo);
         }
     };
 
@@ -103,6 +105,10 @@ public class FlickrSearchResultActivity extends AppCompatActivity {
         setContentView(R.layout.activity_flickr_search_result);
         queue = FlickrRequestQueue.getInstance(this).getRequestQueue();
         imageLoader = FlickrRequestQueue.getInstance(this).getImageLoader();
+        noFlickrResultsMessage = (LinearLayoutCompat) findViewById(R.id.no_flickr_results_message);
+        noFlickrResultsMessage.setVisibility(View.GONE);
+        loadingSpinner = (ProgressBar) findViewById(R.id.loading_spinner);
+        loadingSpinner.isIndeterminate();
 
         LocalBroadcastManager.getInstance(this).registerReceiver(addFlickrPhotoMessageReceiver, new IntentFilter(FlickrPreviewListAdapter.ADD_FLICKR_PHOTO));
 
@@ -147,7 +153,15 @@ public class FlickrSearchResultActivity extends AppCompatActivity {
                                 photo.setServerId(photoObject.getString("server"));
                                 photos.add(photo);
                             }
-                            recyclerViewAdapter.notifyDataSetChanged();
+                            loadingSpinner.setVisibility(View.GONE);
+                            if (photos.size() == 0) {
+                                noFlickrResultsMessage.setVisibility(View.VISIBLE);
+                                recyclerView.setVisibility(View.GONE);
+                            } else {
+                                recyclerViewAdapter.notifyDataSetChanged();
+                                noFlickrResultsMessage.setVisibility(View.GONE);
+                                recyclerView.setVisibility(View.VISIBLE);
+                            }
                         } catch (JSONException exception) {
                             // Exception occurred while parsing the JSON, display an error.
                             exception.printStackTrace();

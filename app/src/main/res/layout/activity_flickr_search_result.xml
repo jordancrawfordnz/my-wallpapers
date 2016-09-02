@@ -10,6 +10,41 @@
     tools:context=".FlickrSearchResultActivity"
     android:background="@color/flickr_results_background">
 
+    <ProgressBar
+        android:id="@+id/loading_spinner"
+        style="?android:attr/progressBarStyleLarge"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_centerVertical="true"/>
+
+    <android.support.v7.widget.LinearLayoutCompat
+        android:id="@+id/no_flickr_results_message"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
+        android:orientation="vertical"
+        android:layout_centerHorizontal="true">
+
+        <android.support.v7.widget.AppCompatTextView
+            android:layout_centerVertical="true"
+            android:layout_centerHorizontal="true"
+            android:text="@string/no_flickr_results_message"
+            android:textSize="@dimen/flickr_preview_no_flickr_results_text_size"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+
+        <android.support.v7.widget.AppCompatTextView
+            android:layout_centerVertical="true"
+            android:layout_centerHorizontal="true"
+            android:width="@dimen/flickr_preview_no_flickr_results_explainer_width"
+            android:textSize="@dimen/flickr_preview_no_flickr_results_explainer_text_size"
+            android:text="@string/no_flickr_results_explainer"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+
+    </android.support.v7.widget.LinearLayoutCompat>
+
     <android.support.v7.widget.RecyclerView
         android:id="@+id/flickr_preview_recycler_view"
         android:scrollbars="vertical"

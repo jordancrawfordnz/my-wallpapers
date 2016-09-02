@@ -8,6 +8,7 @@ import android.os.Parcelable;
  */
 public class FlickrPhoto implements Parcelable {
     String id, farmId, serverId, secret;
+    boolean chosen = false;
 
     @Override
     public String toString() {
@@ -16,6 +17,7 @@ public class FlickrPhoto implements Parcelable {
                 ", farmId='" + farmId + '\'' +
                 ", serverId='" + serverId + '\'' +
                 ", secret='" + secret + '\'' +
+                ", chosen=" + chosen +
                 '}';
     }
 
@@ -67,6 +69,14 @@ public class FlickrPhoto implements Parcelable {
         this.secret = secret;
     }
 
+    public boolean isChosen() {
+        return chosen;
+    }
+
+    public void setChosen(boolean chosen) {
+        this.chosen = chosen;
+    }
+
     public FlickrPhoto() {}
 
     protected FlickrPhoto(Parcel in) {
@@ -74,6 +84,7 @@ public class FlickrPhoto implements Parcelable {
         farmId = in.readString();
         serverId = in.readString();
         secret = in.readString();
+        chosen = in.readByte() != 0;
     }
 
     @Override
@@ -87,6 +98,7 @@ public class FlickrPhoto implements Parcelable {
         dest.writeString(farmId);
         dest.writeString(serverId);
         dest.writeString(secret);
+        dest.writeByte((byte) (chosen ? 1 : 0));
     }
 
     @SuppressWarnings("unused")

@@ -20,6 +20,9 @@ public class FlickrPreviewListAdapter extends RecyclerView.Adapter<FlickrPreview
     public static final String ADD_FLICKR_PHOTO = "add_flickr_photo";
     public static final String FLICKR_PHOTO_EXTRA = "flickr_photo";
 
+    private static final float CHOSEN_ALPHA = 0.5f;
+    private static final float NOT_CHOSEN_ALPHA = 1f;
+
     private ArrayList<FlickrPhoto> photos;
     private ImageLoader imageLoader;
     private Context context;
@@ -45,14 +48,24 @@ public class FlickrPreviewListAdapter extends RecyclerView.Adapter<FlickrPreview
             String url = photo.getThumbnailUrl();
             imageLoader.get(url, ImageLoader.getImageListener(imageView, R.drawable.blank, R.drawable.blank));
             imageView.setImageUrl(url, imageLoader);
+            if (photo.isChosen()) {
+                imageView.setAlpha(CHOSEN_ALPHA);
+            } else {
+                imageView.setAlpha(NOT_CHOSEN_ALPHA);
+            }
 
             // Setup a click listener.
             imageView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    Intent intent = new Intent(ADD_FLICKR_PHOTO);
-                    intent.putExtra(FLICKR_PHOTO_EXTRA, photo);
-                    LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
+                    if (!photo.isChosen()) {
+                        imageView.setAlpha(CHOSEN_ALPHA);
+                        photo.setChosen(true);
+
+                        Intent intent = new Intent(ADD_FLICKR_PHOTO);
+                        intent.putExtra(FLICKR_PHOTO_EXTRA, photo);
+                        LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
+                    }
                 }
             });
         }
