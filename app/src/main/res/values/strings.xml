@@ -26,4 +26,6 @@
     <string name="flickr_download_started">Downloading wallpaper from Flickr</string>
     <string name="time_as_wallpaper_never">Never</string>
     <string name="time_as_wallpaper_days">%1$d days</string>
+    <string name="no_wallpapers_message">No wallpapers.</string>
+    <string name="no_wallpapers_explainer">Search from Flickr, add from local sources or share photos to the app.</string>
 </resources>

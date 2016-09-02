@@ -20,6 +20,8 @@ import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.View;
+import android.support.v7.widget.LinearLayoutCompat;
 import android.widget.Toast;
 import java.util.ArrayList;
 
@@ -34,6 +36,7 @@ public class MainActivity extends AppCompatActivity {
     private RecyclerView wallpaperRecyclerView;
     private RecyclerView.LayoutManager wallpaperRecyclerViewLayoutManager;
     private RecyclerView.Adapter wallpaperRecyclerViewAdapter;
+    private LinearLayoutCompat noWallpapersMessage;
 
     private BroadcastReceiver wallpaperAddedMessageReceiver = new BroadcastReceiver() {
         @Override
@@ -57,7 +60,14 @@ public class MainActivity extends AppCompatActivity {
 
             wallpapers.clear();
             wallpapers.addAll(updatedWallpapers);
-            wallpaperRecyclerViewAdapter.notifyDataSetChanged();
+            if (wallpapers.size() == 0) {
+                noWallpapersMessage.setVisibility(View.VISIBLE);
+                wallpaperRecyclerView.setVisibility(View.GONE);
+            } else {
+                wallpaperRecyclerViewAdapter.notifyDataSetChanged();
+                noWallpapersMessage.setVisibility(View.GONE);
+                wallpaperRecyclerView.setVisibility(View.VISIBLE);
+            }
         }
     };
 
@@ -212,6 +222,8 @@ public class MainActivity extends AppCompatActivity {
         wallpaperRecyclerView.setLayoutManager(wallpaperRecyclerViewLayoutManager);
         wallpaperRecyclerViewAdapter = new WallpaperListAdapter(this, wallpapers);
         wallpaperRecyclerView.setAdapter(wallpaperRecyclerViewAdapter);
+
+        noWallpapersMessage = (LinearLayoutCompat) findViewById(R.id.no_wallpapers_message);
     }
 
     @Override

@@ -22,7 +22,7 @@ public class WallpaperUtils {
     private static final String SMALL_IMAGES_DIR = "small_images";
     private static final String LARGE_IMAGES_DIR = "large_images";
     private static final String IMAGE_URI_PREFIX = "kiwi.jordancrawford.mywallpapers";
-    private static final int SECONDS_IN_DAY = 1;
+    private static final int SECONDS_IN_DAY = 86400;
     private static final int MILLISECONDS_IN_SECOND = 1000;
 
     // Determines the secondary dimension to use when given its current size and the size of the largest dimension (which will become SMALL_IMAGE_SCALE_MAX_DIMENSION).

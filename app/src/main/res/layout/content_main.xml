@@ -12,6 +12,33 @@
     tools:context="kiwi.jordancrawford.mywallpapers.MainActivity"
     tools:showIn="@layout/activity_main">
 
+    <android.support.v7.widget.LinearLayoutCompat
+        android:id="@+id/no_wallpapers_message"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
+        android:orientation="vertical"
+        android:layout_centerHorizontal="true">
+
+        <android.support.v7.widget.AppCompatTextView
+            android:layout_centerVertical="true"
+            android:layout_centerHorizontal="true"
+            android:text="@string/no_wallpapers_message"
+            android:textSize="@dimen/wallpaper_card_no_wallpapers_text_size"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+
+        <android.support.v7.widget.AppCompatTextView
+            android:layout_centerVertical="true"
+            android:layout_centerHorizontal="true"
+            android:width="@dimen/wallpaper_card_no_wallpapers_explainer_width"
+            android:textSize="@dimen/wallpaper_card_no_wallpapers_explainer_text_size"
+            android:text="@string/no_wallpapers_explainer"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+
+    </android.support.v7.widget.LinearLayoutCompat>
+
     <android.support.v7.widget.RecyclerView
         android:id="@+id/wallpaper_list_recycler_view"
         android:scrollbars="vertical"
