@@ -4,6 +4,8 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 /**
+ * Represents a Wallpaper. This is Parcelable so it can be passed with intents.
+ *
  * Created by Jordan on 30/08/16.
  */
 public class Wallpaper implements Parcelable {

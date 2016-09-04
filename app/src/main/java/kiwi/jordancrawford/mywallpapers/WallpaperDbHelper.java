@@ -10,6 +10,8 @@ import java.util.ArrayList;
 import static kiwi.jordancrawford.mywallpapers.WallpaperContract.WallpaperEntry;
 
 /**
+ * Manages the database and provides helper methods to fetch and update data.
+ *
  * Created by Jordan on 30/08/16.
  */
 public class WallpaperDbHelper extends SQLiteOpenHelper {
@@ -20,7 +22,7 @@ public class WallpaperDbHelper extends SQLiteOpenHelper {
             "CREATE TABLE " + WallpaperEntry.TABLE_NAME + "("
             + WallpaperEntry._ID + " " + ID_PROPERTIES + ","
             + WallpaperEntry.COLUMN_NAME_DAYS_AS_WALLPAPER + " " + WallpaperEntry.COLUMN_NAME_DAYS_AS_WALLPAPER_TYPE + ","
-            + WallpaperEntry.COLUMN_NAME_IS_CURRENT + " " + WallpaperEntry.COLUMN_NAME_IS_CURRENT + ","
+            + WallpaperEntry.COLUMN_NAME_IS_CURRENT + " " + WallpaperEntry.COLUMN_NAME_IS_CURRENT_TYPE + ","
             + WallpaperEntry.COLUMN_NAME_WALLPAPER_SINCE + " " + WallpaperEntry.COLUMN_NAME_WALLPAPER_SINCE_TYPE + ")";
     private static final String SQL_DROP_TABLE_WALLPAPERS =
             "DROP TABLE IF EXISTS " + WallpaperEntry.TABLE_NAME;
@@ -46,6 +48,7 @@ public class WallpaperDbHelper extends SQLiteOpenHelper {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
     }
 
+    // Gets the field required to add / update a Wallpaper.
     private ContentValues getWallpaperFields(Wallpaper wallpaper) {
         ContentValues values = new ContentValues();
         values.put(WallpaperEntry.COLUMN_NAME_DAYS_AS_WALLPAPER, wallpaper.getDaysAsWallpaper());

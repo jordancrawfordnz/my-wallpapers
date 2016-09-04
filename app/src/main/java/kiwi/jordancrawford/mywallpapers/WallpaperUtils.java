@@ -5,15 +5,14 @@ import android.graphics.Bitmap;
 import android.net.Uri;
 import android.support.v4.content.FileProvider;
 
-import com.android.volley.toolbox.ImageLoader;
-
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.net.URI;
 import java.util.ArrayList;
 
 /**
+ * Contains helpers functions to manage wallpapers.
+ *
  * Created by Jordan on 31/08/16.
  */
 public class WallpaperUtils {

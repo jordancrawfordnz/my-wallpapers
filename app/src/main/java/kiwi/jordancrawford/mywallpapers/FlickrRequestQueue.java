@@ -13,6 +13,8 @@ import com.android.volley.toolbox.HurlStack;
 import com.android.volley.toolbox.ImageLoader;
 
 /**
+ * Manages the Flickr request queue so it works with caching.
+ *
  * With help from: http://www.truiton.com/2015/03/android-volley-imageloader-networkimageview-example/
  *
  * Created by Jordan on 2/09/16.

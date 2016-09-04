@@ -7,6 +7,8 @@ import android.os.AsyncTask;
 import android.support.v4.content.LocalBroadcastManager;
 
 /**
+ * An Async task that deletes a wallpaper and broadcasts when done.
+ *
  * Created by Jordan on 31/08/16.
  */
 public class DeleteWallpaperTask extends AsyncTask<Wallpaper, Void, Void> {
@@ -18,6 +20,7 @@ public class DeleteWallpaperTask extends AsyncTask<Wallpaper, Void, Void> {
         this.context = context.getApplicationContext();
     }
 
+    // Deletes the provided wallpaper.
     @Override
     protected Void doInBackground(Wallpaper... wallpapers) {
         if (wallpapers.length == 0) {

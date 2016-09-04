@@ -16,6 +16,8 @@ import java.lang.reflect.Array;
 import java.util.ArrayList;
 
 /**
+ * The list adapter used for Flickr search result lists.
+ *
  * Created by Jordan on 2/09/16.
  */
 public class FlickrPreviewListAdapter extends RecyclerView.Adapter<FlickrPreviewListAdapter.FlickrPreviewViewHolder> {
@@ -48,7 +50,7 @@ public class FlickrPreviewListAdapter extends RecyclerView.Adapter<FlickrPreview
         }
 
         public void setupView(final FlickrPhoto photo) {
-            // Load the thumbnail image.
+            // Load the thumbnail image. (see FlickrRequestQueue, this uses a cache).
             String url = photo.getThumbnailUrl();
             imageLoader.get(url, ImageLoader.getImageListener(imageView, R.drawable.blank, R.drawable.blank));
             imageView.setImageUrl(url, imageLoader);

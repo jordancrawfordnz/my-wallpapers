@@ -8,6 +8,8 @@ import android.support.v4.content.LocalBroadcastManager;
 import java.util.ArrayList;
 
 /**
+ * Sets the current wallpaper.
+ *
  * Created by Jordan on 1/09/16.
  */
 public class SetCurrentWallpaperTask extends AsyncTask<Wallpaper, Void, Void> {

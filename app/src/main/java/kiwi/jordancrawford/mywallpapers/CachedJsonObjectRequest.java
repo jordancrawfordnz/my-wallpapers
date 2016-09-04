@@ -19,7 +19,6 @@ import java.util.Map;
  * This ignores the cache headers from the API so that Volley will cache them.
  * Clearly ignoring the header is not best practice but it is in the interests of users for speed, battery and network activity.
  *
- * Created by Jordan on 2/09/16.
  */
 public class CachedJsonObjectRequest extends JsonObjectRequest {
     public CachedJsonObjectRequest(int method, String url, JSONObject jsonRequest,

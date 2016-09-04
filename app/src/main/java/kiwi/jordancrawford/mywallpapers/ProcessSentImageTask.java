@@ -10,7 +10,7 @@ import android.widget.Toast;
 import java.io.IOException;
 
 /**
- * Does all the processing on images sent to the activity. After completion, sents a broadcast to the activity (if it is around) to refresh the list of Wallpapers.
+ * Does all the processing on images sent to the activity. After completion, sends a broadcast to the activity (if it is around) to refresh the list of Wallpapers.
  *
  * Created by Jordan on 31/08/16.
  */

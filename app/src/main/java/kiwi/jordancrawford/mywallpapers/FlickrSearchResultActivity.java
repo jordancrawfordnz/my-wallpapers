@@ -36,6 +36,9 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 
+/**
+ * Loads and displays a Flickr search result.
+ */
 public class FlickrSearchResultActivity extends AppCompatActivity {
     private static final String API_KEY = "c4b0bc11e918734dd50f7f0eb21051a5";
     private static final String DOWNLOADED_PHOTO_IDS_KEY = "downloaded_photo_ids";
@@ -106,8 +109,12 @@ public class FlickrSearchResultActivity extends AppCompatActivity {
         setContentView(R.layout.activity_flickr_search_result);
         queue = FlickrRequestQueue.getInstance(this).getRequestQueue();
         imageLoader = FlickrRequestQueue.getInstance(this).getImageLoader();
+
+        // Hide the 'no results' message until loaded.
         noFlickrResultsMessage = (LinearLayoutCompat) findViewById(R.id.no_flickr_results_message);
         noFlickrResultsMessage.setVisibility(View.GONE);
+
+        // Spin the loading spinner until loaded.
         loadingSpinner = (ProgressBar) findViewById(R.id.loading_spinner);
         loadingSpinner.isIndeterminate();
 
@@ -120,6 +127,7 @@ public class FlickrSearchResultActivity extends AppCompatActivity {
 
         LocalBroadcastManager.getInstance(this).registerReceiver(addFlickrPhotoMessageReceiver, new IntentFilter(FlickrPreviewListAdapter.ADD_FLICKR_PHOTO));
 
+        // Display the Flickr results list.
         recyclerView = (RecyclerView) findViewById(R.id.flickr_preview_recycler_view);
         int deviceOrientation = getResources().getConfiguration().orientation;
         int numberOfColumns = deviceOrientation == Configuration.ORIENTATION_LANDSCAPE ? 3 : 2;
@@ -161,6 +169,8 @@ public class FlickrSearchResultActivity extends AppCompatActivity {
                                 photo.setServerId(photoObject.getString("server"));
                                 photos.add(photo);
                             }
+
+                            // Hide the loading spinner and display the 'no results' message if needed.
                             loadingSpinner.setVisibility(View.GONE);
                             if (photos.size() == 0) {
                                 noFlickrResultsMessage.setVisibility(View.VISIBLE);
@@ -200,7 +210,7 @@ public class FlickrSearchResultActivity extends AppCompatActivity {
         super.onDestroy();
     }
 
-
+    // Save the downloaded photo ID's.
     @Override
     protected void onSaveInstanceState (Bundle outState) {
         outState.putStringArrayList(DOWNLOADED_PHOTO_IDS_KEY, downloadedPhotoIds);

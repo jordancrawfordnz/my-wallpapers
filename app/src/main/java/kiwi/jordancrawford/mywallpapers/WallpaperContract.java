@@ -3,6 +3,8 @@ package kiwi.jordancrawford.mywallpapers;
 import android.provider.BaseColumns;
 
 /**
+ * Stores types and column names for the database.
+ *
  * Created by Jordan on 30/08/16.
  */
 public final class WallpaperContract {

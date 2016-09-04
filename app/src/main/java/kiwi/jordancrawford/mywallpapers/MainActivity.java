@@ -24,8 +24,10 @@ import android.support.v7.widget.LinearLayoutCompat;
 import android.widget.Toast;
 import java.util.ArrayList;
 
+/**
+ * Displays the list of wallpapers and provides options to add new wallpapers, set, and delete wallpapers.
+ */
 public class MainActivity extends AppCompatActivity {
-
     private final int PICK_IMAGE_REQUEST = 1;
     private final int SET_WALLPAPER_REQUEST = 2;
     private final String INTENT_USED_KEY = "used";
@@ -60,7 +62,10 @@ public class MainActivity extends AppCompatActivity {
             ArrayList<Wallpaper> updatedWallpapers = intent.getParcelableArrayListExtra(GetAllWallpapersTask.ALL_WALLPAPERS_EXTRA);
             currentWallpaper = intent.getParcelableExtra(GetAllWallpapersTask.CURRENT_WALLPAPER_EXTRA);
 
+            // Update the list of wallpapers.
             wallpapers.clear();
+
+            // Display the no wallpaper message if there are none.
             wallpapers.addAll(updatedWallpapers);
             if (wallpapers.size() == 0) {
                 noWallpapersMessage.setVisibility(View.VISIBLE);
@@ -169,7 +174,6 @@ public class MainActivity extends AppCompatActivity {
         switch (item.getItemId()) {
             case R.id.action_add_local: {
                 // Open the dialog to pick content from other applications.
-
                 Intent intent = new Intent();
                 intent.setType("image/*");
                 intent.setAction(Intent.ACTION_GET_CONTENT);
@@ -207,6 +211,7 @@ public class MainActivity extends AppCompatActivity {
             currentWallpaper = savedInstanceState.getParcelable(CURRENT_WALLPAPER_KEY);
         }
 
+        // Setup broadcast listeners. Broadcasts are used to deal with async tasks and menu options. These are important because the activity instance could be re-created at any time.
         LocalBroadcastManager.getInstance(this).registerReceiver(wallpaperAddedMessageReceiver, new IntentFilter(ProcessSentImageTask.WALLPAPER_ADDED_BROADCAST_INTENT));
         LocalBroadcastManager.getInstance(this).registerReceiver(getAllWallpaperMessageReceiver, new IntentFilter(GetAllWallpapersTask.GET_ALL_WALLPAPERS_BROADCAST_INTENT));
         LocalBroadcastManager.getInstance(this).registerReceiver(setWallpaperMessageReceiver, new IntentFilter(WallpaperListAdapter.SET_WALLPAPER_BROADCAST_INTENT));

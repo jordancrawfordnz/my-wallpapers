@@ -14,6 +14,8 @@ import android.widget.TextView;
 import java.util.ArrayList;
 
 /**
+ * Used to display a list of Wallpapers with metadata and options to use or delete.
+ *
  * Created by Jordan on 31/08/16.
  */
 public class WallpaperListAdapter extends RecyclerView.Adapter<WallpaperListAdapter.WallpaperViewHolder> {
@@ -81,12 +83,14 @@ public class WallpaperListAdapter extends RecyclerView.Adapter<WallpaperListAdap
             }
             daysAsWallpaperView.setText(daysAsWallpaperText);
 
+            // Show a check mark if the wallpaper is the current wallpaper.
             if (wallpaper.isCurrent()) {
                 wallpaperIsCurrentImageView.setImageResource(R.drawable.ic_check_black_24dp);
             } else {
                 wallpaperIsCurrentImageView.setImageResource(R.drawable.blank);
             }
 
+            // When the set button is clicked, send a broadcast to set the wallpaper.
             setButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
@@ -97,6 +101,7 @@ public class WallpaperListAdapter extends RecyclerView.Adapter<WallpaperListAdap
             });
             setButton.setEnabled(!wallpaper.isCurrent);
 
+            // When the delete button is clicked, send a broadcast to delete the wallpaper.
             deleteButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {

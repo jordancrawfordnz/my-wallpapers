@@ -1,6 +1,11 @@
 package kiwi.jordancrawford.mywallpapers;
 
-// Taken from http://stackoverflow.com/questions/3647993/android-bitmaps-loaded-from-gallery-are-rotated-in-imageview
+/*
+ From http://stackoverflow.com/questions/3647993/android-bitmaps-loaded-from-gallery-are-rotated-in-imageview
+
+ Helps with image processing so that images from photo apps that use EXIF data to get rotation information will appear correctly.
+ This rotates the image correctly before saving it at a lower resolution.
+*/
 
 import android.content.Context;
 import android.database.Cursor;

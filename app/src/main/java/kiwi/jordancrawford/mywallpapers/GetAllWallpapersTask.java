@@ -11,6 +11,7 @@ import java.util.List;
 
 /**
  * Gets all wallpapers from the database asynchronously.
+ *
  * Created by Jordan on 31/08/16.
  */
 public class GetAllWallpapersTask extends AsyncTask<Void, Void, ArrayList<Wallpaper>> {
