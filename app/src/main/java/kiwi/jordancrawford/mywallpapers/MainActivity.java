@@ -22,6 +22,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.support.v7.widget.LinearLayoutCompat;
+import android.widget.EditText;
 import android.widget.Toast;
 import java.util.ArrayList;
 
@@ -50,6 +51,13 @@ public class MainActivity extends AppCompatActivity {
         }
     };
 
+    private BroadcastReceiver wallpaperUpdateCompleteReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            loadAllWallpapers();
+        }
+    };
+
     private BroadcastReceiver wallpaperDownloadedMessageReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -60,7 +68,30 @@ public class MainActivity extends AppCompatActivity {
     private BroadcastReceiver changeWallpaperDescriptionReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            System.out.println("Got change wallpaper request");
+            final Wallpaper wallpaper = intent.getParcelableExtra(WallpaperListAdapter.WALLPAPER_EXTRA);
+
+            final EditText newDescription = new EditText(MainActivity.this);
+            if (wallpaper.getDescription() != null) {
+                newDescription.setText(wallpaper.getDescription());
+            }
+
+            // Make an alert dialog to allow the user to change the description.
+            new AlertDialog.Builder(MainActivity.this).setTitle(R.string.wallpaper_change_description_dialog_title)
+                    .setView(newDescription)
+                    .setPositiveButton(R.string.wallpaper_change_description_dialog_set_button_text, new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int whichButton) {
+                            wallpaper.setDescription(newDescription.getText().toString());
+                            new UpdateWallpaperTask(MainActivity.this).execute(wallpaper);
+                            dialog.dismiss();
+                        }
+                    })
+                    .setNegativeButton(R.string.wallpaper_change_description_dialog_cancel_button_text, new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int whichButton) {
+                            dialog.dismiss();
+                        }
+                    })
+                    .show();
+
         }
     };
 
@@ -228,6 +259,7 @@ public class MainActivity extends AppCompatActivity {
         LocalBroadcastManager.getInstance(this).registerReceiver(wallpaperSetCompleteMessageReceiver, new IntentFilter(SetCurrentWallpaperTask.WALLPAPER_SET_COMPLETE_BROADCAST_INTENT));
         LocalBroadcastManager.getInstance(this).registerReceiver(wallpaperDownloadedMessageReceiver, new IntentFilter(ProcessDownloadedWallpaperTask.WALLPAPER_DOWNLOADED_BROADCAST_INTENT));
         LocalBroadcastManager.getInstance(this).registerReceiver(changeWallpaperDescriptionReceiver, new IntentFilter(WallpaperListAdapter.CHANGE_WALLPAPER_DESCRIPTION_BROADCAST_INTENT));
+        LocalBroadcastManager.getInstance(this).registerReceiver(wallpaperUpdateCompleteReceiver, new IntentFilter(UpdateWallpaperTask.WALLPAPER_UPDATE_COMPLETE_BROADCAST_INTENT));
 
         processIntent(getIntent());
         loadAllWallpapers();
@@ -262,6 +294,8 @@ public class MainActivity extends AppCompatActivity {
         LocalBroadcastManager.getInstance(this).unregisterReceiver(wallpaperSetCompleteMessageReceiver);
         LocalBroadcastManager.getInstance(this).unregisterReceiver(wallpaperDownloadedMessageReceiver);
         LocalBroadcastManager.getInstance(this).unregisterReceiver(changeWallpaperDescriptionReceiver);
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(wallpaperUpdateCompleteReceiver);
+
         super.onDestroy();
     }
 

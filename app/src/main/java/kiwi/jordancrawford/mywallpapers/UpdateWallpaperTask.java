@@ -5,22 +5,18 @@ import android.content.Intent;
 import android.os.AsyncTask;
 import android.support.v4.content.LocalBroadcastManager;
 
-import java.util.ArrayList;
-
 /**
- * Sets the current wallpaper.
+ * Update the provided wallpaper in the database.
  *
- * Created by Jordan on 1/09/16.
+ * Created by Jordan on 5/09/16.
  */
-public class SetCurrentWallpaperTask extends AsyncTask<Wallpaper, Void, Void> {
-    public static final String WALLPAPER_SET_COMPLETE_BROADCAST_INTENT = "wallpaper_set_complete_message";
+public class UpdateWallpaperTask extends AsyncTask<Wallpaper, Void, Void> {
+    public static final String WALLPAPER_UPDATE_COMPLETE_BROADCAST_INTENT = "wallpaper_update_complete_message";
     private Context context;
-    private Wallpaper currentWallpaper;
 
-    public SetCurrentWallpaperTask(Context context, Wallpaper currentWallpaper) {
+    public UpdateWallpaperTask(Context context) {
         super();
         this.context = context.getApplicationContext();
-        this.currentWallpaper = currentWallpaper;
     }
 
     @Override
@@ -29,16 +25,16 @@ public class SetCurrentWallpaperTask extends AsyncTask<Wallpaper, Void, Void> {
             return null;
         }
         Wallpaper wallpaper = wallpapers[0];
-        WallpaperUtils.setNewWallpaper(context, currentWallpaper, wallpaper);
+
+        WallpaperDbHelper.getInstance(context).updateWallpaper(wallpaper);
 
         return null;
     }
 
     @Override
     protected void onPostExecute(Void result) {
-        // Broadcast that the set is done.
-        Intent intent = new Intent(WALLPAPER_SET_COMPLETE_BROADCAST_INTENT);
+        // Broadcast that the update is done.
+        Intent intent = new Intent(WALLPAPER_UPDATE_COMPLETE_BROADCAST_INTENT);
         LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
     }
-
 }

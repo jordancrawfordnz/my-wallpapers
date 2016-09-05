@@ -32,4 +32,7 @@
     <string name="no_flickr_results_message">No results.</string>
     <string name="no_flickr_results_explainer">Try some different keywords, add from local sources or share photos to the app.</string>
     <string name="wallpaper_change_description_button_text">Change description</string>
+    <string name="wallpaper_change_description_dialog_title">Change description</string>
+    <string name="wallpaper_change_description_dialog_set_button_text">Set</string>
+    <string name="wallpaper_change_description_dialog_cancel_button_text">Cancel</string>
 </resources>
