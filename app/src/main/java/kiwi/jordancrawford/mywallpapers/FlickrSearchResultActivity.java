@@ -13,6 +13,7 @@ import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutCompat;
 import android.support.v7.widget.RecyclerView;
+import android.text.Html;
 import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.Toast;
@@ -80,7 +81,7 @@ public class FlickrSearchResultActivity extends AppCompatActivity {
                                     bitmaps.setLargeImage(largeImageResponse.getBitmap());
 
                                     // Start an async task to save the wallpaper.
-                                    new ProcessDownloadedWallpaperTask(context).execute(bitmaps);
+                                    new ProcessDownloadedWallpaperTask(context, photo.getDescription()).execute(bitmaps);
                                 }
                             }
 
@@ -149,7 +150,7 @@ public class FlickrSearchResultActivity extends AppCompatActivity {
             try {
                 encodedQuery = URLEncoder.encode(query, "utf-8");
 
-                String requestUrl = "https://api.flickr.com/services/rest/?method=flickr.photos.search&api_key=" + API_KEY + "&text=" + encodedQuery + "&format=json&nojsoncallback=1";
+                String requestUrl = "https://api.flickr.com/services/rest/?method=flickr.photos.search&extras=description&api_key=" + API_KEY + "&text=" + encodedQuery + "&format=json&nojsoncallback=1";
                 JsonObjectRequest searchRequest = new CachedJsonObjectRequest(Request.Method.GET, requestUrl, null, new Response.Listener<JSONObject>() {
                     @Override
                     public void onResponse(JSONObject response) {
@@ -160,6 +161,7 @@ public class FlickrSearchResultActivity extends AppCompatActivity {
                             JSONArray photoArray = photosObject.getJSONArray("photo");
                             for (int photoIndex = 0; photoIndex < photoArray.length(); photoIndex++) {
                                 JSONObject photoObject = photoArray.getJSONObject(photoIndex);
+                                JSONObject descriptionObject = photoObject.getJSONObject("description");
 
                                 // Populate the FlickrPhoto object.
                                 FlickrPhoto photo = new FlickrPhoto();
@@ -167,6 +169,13 @@ public class FlickrSearchResultActivity extends AppCompatActivity {
                                 photo.setFarmId(photoObject.getString("farm"));
                                 photo.setSecret(photoObject.getString("secret"));
                                 photo.setServerId(photoObject.getString("server"));
+
+                                // Strip HTML tags with Android.
+                                String description = Html.fromHtml(descriptionObject.getString("_content")).toString();
+                                if (description.length() > 0) {
+                                    photo.setDescription(description);
+                                }
+
                                 photos.add(photo);
                             }
 

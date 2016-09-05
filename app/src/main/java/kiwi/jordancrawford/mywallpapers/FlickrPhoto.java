@@ -10,7 +10,7 @@ import android.os.Parcelable;
  * Created by Jordan on 1/09/16.
  */
 public class FlickrPhoto implements Parcelable {
-    String id, farmId, serverId, secret;
+    String id, farmId, serverId, secret, description;
 
     @Override
     public String toString() {
@@ -19,6 +19,7 @@ public class FlickrPhoto implements Parcelable {
                 ", farmId='" + farmId + '\'' +
                 ", serverId='" + serverId + '\'' +
                 ", secret='" + secret + '\'' +
+                ", description='" + description + '\'' +
                 '}';
     }
 
@@ -74,6 +75,14 @@ public class FlickrPhoto implements Parcelable {
         this.secret = secret;
     }
 
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
     public FlickrPhoto() {}
 
     protected FlickrPhoto(Parcel in) {
@@ -81,6 +90,7 @@ public class FlickrPhoto implements Parcelable {
         farmId = in.readString();
         serverId = in.readString();
         secret = in.readString();
+        description = in.readString();
     }
 
     @Override
@@ -94,6 +104,7 @@ public class FlickrPhoto implements Parcelable {
         dest.writeString(farmId);
         dest.writeString(serverId);
         dest.writeString(secret);
+        dest.writeString(description);
     }
 
     @SuppressWarnings("unused")

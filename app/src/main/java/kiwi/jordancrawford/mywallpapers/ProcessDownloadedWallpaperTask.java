@@ -18,9 +18,11 @@ public class ProcessDownloadedWallpaperTask extends AsyncTask<WallpaperBitmaps, 
     public static final String WALLPAPER_EXTRA = "wallpaper";
 
     private Context context;
+    String description;
 
-    public ProcessDownloadedWallpaperTask(Context context) {
+    public ProcessDownloadedWallpaperTask(Context context, String description) {
         this.context = context.getApplicationContext();
+        this.description = description;
     }
 
     @Override
@@ -30,7 +32,7 @@ public class ProcessDownloadedWallpaperTask extends AsyncTask<WallpaperBitmaps, 
 
             // Create the wallpaper.
             try {
-                return WallpaperUtils.createWallpaperFromBitmaps(context, bitmaps);
+                return WallpaperUtils.createWallpaperFromBitmaps(context, bitmaps, description);
             } catch (IOException e) {
                 return null;
             }

@@ -72,14 +72,17 @@ public class WallpaperListAdapter extends RecyclerView.Adapter<WallpaperListAdap
         public void setupView(final Wallpaper wallpaper) {
             previewImageView.setImageURI(WallpaperUtils.getSmallImageUri(context, wallpaper));
 
+            int actualDaysAsWallpaper = WallpaperUtils.getActualDaysAsWallpaper(wallpaper);
             String daysAsWallpaperText;
-            if (wallpaper.getDaysAsWallpaper() == 0 && !wallpaper.isCurrent()) {
+            if (actualDaysAsWallpaper == 0 && !wallpaper.isCurrent()) {
                 // Use the never text.
                 daysAsWallpaperText = context.getResources().getString(R.string.time_as_wallpaper_never);
+            } else if (actualDaysAsWallpaper == 1) {
+                daysAsWallpaperText = context.getResources().getString(R.string.time_as_wallpaper_days_singular);
             } else {
-                // Use the day display text.
-                String format = context.getResources().getString(R.string.time_as_wallpaper_days);
-                daysAsWallpaperText = String.format(format, WallpaperUtils.getActualDaysAsWallpaper(wallpaper));
+                    // Use the day display text.
+                    String format = context.getResources().getString(R.string.time_as_wallpaper_days);
+                    daysAsWallpaperText = String.format(format, actualDaysAsWallpaper);
             }
             daysAsWallpaperView.setText(daysAsWallpaperText);
 

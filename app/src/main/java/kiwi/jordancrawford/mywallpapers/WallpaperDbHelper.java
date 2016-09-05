@@ -21,9 +21,10 @@ public class WallpaperDbHelper extends SQLiteOpenHelper {
     private static final String SQL_CREATE_TABLE_WALLPAPERS =
             "CREATE TABLE " + WallpaperEntry.TABLE_NAME + "("
             + WallpaperEntry._ID + " " + ID_PROPERTIES + ","
-            + WallpaperEntry.COLUMN_NAME_DAYS_AS_WALLPAPER + " " + WallpaperEntry.COLUMN_NAME_DAYS_AS_WALLPAPER_TYPE + ","
-            + WallpaperEntry.COLUMN_NAME_IS_CURRENT + " " + WallpaperEntry.COLUMN_NAME_IS_CURRENT_TYPE + ","
-            + WallpaperEntry.COLUMN_NAME_WALLPAPER_SINCE + " " + WallpaperEntry.COLUMN_NAME_WALLPAPER_SINCE_TYPE + ")";
+            + WallpaperEntry.DAYS_AS_WALLPAPER_COLUMN_NAME + " " + WallpaperEntry.DAYS_AS_WALLPAPER_TYPE + ","
+            + WallpaperEntry.IS_CURRENT_COLUMN_NAME + " " + WallpaperEntry.IS_CURRENT_TYPE + ","
+            + WallpaperEntry.WALLPAPER_SINCE_COLUMN_NAME + " " + WallpaperEntry.WALLPAPER_SINCE_TYPE + ","
+            + WallpaperEntry.DESCRIPTION_COLUMN_NAME + " " + WallpaperEntry.DESCRIPTION_TYPE +  ")";
     private static final String SQL_DROP_TABLE_WALLPAPERS =
             "DROP TABLE IF EXISTS " + WallpaperEntry.TABLE_NAME;
 
@@ -51,9 +52,10 @@ public class WallpaperDbHelper extends SQLiteOpenHelper {
     // Gets the field required to add / update a Wallpaper.
     private ContentValues getWallpaperFields(Wallpaper wallpaper) {
         ContentValues values = new ContentValues();
-        values.put(WallpaperEntry.COLUMN_NAME_DAYS_AS_WALLPAPER, wallpaper.getDaysAsWallpaper());
-        values.put(WallpaperEntry.COLUMN_NAME_IS_CURRENT, wallpaper.isCurrent());
-        values.put(WallpaperEntry.COLUMN_NAME_WALLPAPER_SINCE, wallpaper.getWallpaperSince());
+        values.put(WallpaperEntry.DAYS_AS_WALLPAPER_COLUMN_NAME, wallpaper.getDaysAsWallpaper());
+        values.put(WallpaperEntry.IS_CURRENT_COLUMN_NAME, wallpaper.isCurrent());
+        values.put(WallpaperEntry.WALLPAPER_SINCE_COLUMN_NAME, wallpaper.getWallpaperSince());
+        values.put(WallpaperEntry.DESCRIPTION_COLUMN_NAME, wallpaper.getDescription());
         return values;
     }
 
@@ -73,9 +75,10 @@ public class WallpaperDbHelper extends SQLiteOpenHelper {
     public ArrayList<Wallpaper> getAllWallpapers() {
         String[] projection = {
                 WallpaperEntry._ID,
-                WallpaperEntry.COLUMN_NAME_DAYS_AS_WALLPAPER,
-                WallpaperEntry.COLUMN_NAME_IS_CURRENT,
-                WallpaperEntry.COLUMN_NAME_WALLPAPER_SINCE
+                WallpaperEntry.DAYS_AS_WALLPAPER_COLUMN_NAME,
+                WallpaperEntry.IS_CURRENT_COLUMN_NAME,
+                WallpaperEntry.WALLPAPER_SINCE_COLUMN_NAME,
+                WallpaperEntry.DESCRIPTION_COLUMN_NAME
         };
         Cursor queryResult = getReadableDatabase().query(
                 WallpaperEntry.TABLE_NAME,
@@ -84,7 +87,7 @@ public class WallpaperDbHelper extends SQLiteOpenHelper {
                 null,
                 null,
                 null,
-                WallpaperEntry.COLUMN_NAME_IS_CURRENT + " DESC, " + WallpaperEntry.COLUMN_NAME_DAYS_AS_WALLPAPER + " DESC");
+                WallpaperEntry.IS_CURRENT_COLUMN_NAME + " DESC, " + WallpaperEntry.DAYS_AS_WALLPAPER_COLUMN_NAME + " DESC");
         ArrayList<Wallpaper> wallpaperResult = new ArrayList<>();
         if (queryResult.moveToFirst()) {
             do {
@@ -93,6 +96,7 @@ public class WallpaperDbHelper extends SQLiteOpenHelper {
                 currentWallpaper.setDaysAsWallpaper(queryResult.getInt(1));
                 currentWallpaper.setCurrent(queryResult.getInt(2) == 1);
                 currentWallpaper.setWallpaperSince(queryResult.getLong(3));
+                currentWallpaper.setDescription(queryResult.getString(4));
                 wallpaperResult.add(currentWallpaper);
             } while (queryResult.moveToNext());
         }

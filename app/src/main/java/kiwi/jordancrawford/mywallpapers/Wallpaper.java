@@ -12,6 +12,7 @@ public class Wallpaper implements Parcelable {
     long id = -1, wallpaperSince = -1;
     boolean isCurrent;
     int daysAsWallpaper = -1;
+    String description;
 
     public long getId() {
         return id;
@@ -45,6 +46,14 @@ public class Wallpaper implements Parcelable {
         isCurrent = current;
     }
 
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
     @Override
     public String toString() {
         return "Wallpaper{" +
@@ -52,6 +61,7 @@ public class Wallpaper implements Parcelable {
                 ", wallpaperSince=" + wallpaperSince +
                 ", isCurrent=" + isCurrent +
                 ", daysAsWallpaper=" + daysAsWallpaper +
+                ", description='" + description + '\'' +
                 '}';
     }
 
@@ -62,6 +72,7 @@ public class Wallpaper implements Parcelable {
         daysAsWallpaper = in.readInt();
         isCurrent = in.readByte() != 0;
         wallpaperSince = in.readLong();
+        description = in.readString();
     }
 
     @Override
@@ -75,6 +86,7 @@ public class Wallpaper implements Parcelable {
         dest.writeInt(daysAsWallpaper);
         dest.writeByte((byte) (isCurrent ? 1 : 0));
         dest.writeLong(wallpaperSince);
+        dest.writeString(description);
     }
 
     @SuppressWarnings("unused")

@@ -168,11 +168,18 @@ public class WallpaperUtils {
         WallpaperDbHelper.getInstance(context).updateWallpaper(newWallpaper);
     }
 
-    // Stores WallpaperBitmaps in the file system and saves the Wallpaper in the database.
     public static Wallpaper createWallpaperFromBitmaps(Context context, WallpaperBitmaps imagesToUse) throws IOException {
+        return createWallpaperFromBitmaps(context, imagesToUse, null);
+    }
+
+    // Stores WallpaperBitmaps in the file system and saves the Wallpaper in the database.
+    public static Wallpaper createWallpaperFromBitmaps(Context context, WallpaperBitmaps imagesToUse, String description) throws IOException {
         // Create the wallpaper.
         Wallpaper wallpaper = new Wallpaper();
         wallpaper.setDaysAsWallpaper(0);
+        if (description != null) {
+            wallpaper.setDescription(description);
+        }
 
         // Add the wallpaper to the database.
         WallpaperDbHelper.getInstance(context).addWallpaper(wallpaper);
