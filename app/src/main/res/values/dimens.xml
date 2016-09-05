@@ -21,6 +21,7 @@
     <dimen name="wallpaper_card_no_wallpapers_explainer_text_size">20sp</dimen>
     <dimen name="wallpaper_card_description_padding_vertical">5dp</dimen>
     <dimen name="wallpaper_card_description_padding_horizontal">20dp</dimen>
+    <dimen name="wallpaper_card_more_options_button_width">50dp</dimen>
 
     <!-- Flickr Preview -->
     <dimen name="flickr_preview_height">200dp</dimen>

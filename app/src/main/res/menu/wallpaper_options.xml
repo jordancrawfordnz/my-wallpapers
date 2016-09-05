@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/wallpaper_delete_button"
+        android:title="@string/wallpaper_delete_button_text"/>
+
+    <item
+        android:id="@+id/wallpaper_change_description_button"
+        android:title="@string/wallpaper_change_description_button_text"/>
+</menu>
