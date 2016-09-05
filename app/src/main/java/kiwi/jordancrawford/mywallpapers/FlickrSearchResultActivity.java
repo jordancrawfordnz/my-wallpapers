@@ -8,12 +8,17 @@ import android.content.IntentFilter;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.support.v4.content.LocalBroadcastManager;
+import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutCompat;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.SearchView;
 import android.text.Html;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.Toast;
@@ -105,41 +110,21 @@ public class FlickrSearchResultActivity extends AppCompatActivity {
         }
     };
 
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_flickr_search_result);
-        queue = FlickrRequestQueue.getInstance(this).getRequestQueue();
-        imageLoader = FlickrRequestQueue.getInstance(this).getImageLoader();
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
 
-        // Hide the 'no results' message until loaded.
-        noFlickrResultsMessage = (LinearLayoutCompat) findViewById(R.id.no_flickr_results_message);
-        noFlickrResultsMessage.setVisibility(View.GONE);
+        inflater.inflate(R.menu.flickr_search_activity_bar, menu);
+        MenuItem searchItem = menu.findItem(R.id.flickr_action_search);
+        SearchView searchView = (SearchView) MenuItemCompat.getActionView(searchItem);
+        SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
+        searchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
 
-        // Spin the loading spinner until loaded.
-        loadingSpinner = (ProgressBar) findViewById(R.id.loading_spinner);
-        loadingSpinner.isIndeterminate();
+        return super.onCreateOptionsMenu(menu);
+    }
 
-        if (savedInstanceState != null) {
-            downloadedPhotoIds = savedInstanceState.getStringArrayList(DOWNLOADED_PHOTO_IDS_KEY);
-        }
-        if (downloadedPhotoIds == null) {
-            downloadedPhotoIds = new ArrayList<>();
-        }
-
-        LocalBroadcastManager.getInstance(this).registerReceiver(addFlickrPhotoMessageReceiver, new IntentFilter(FlickrPreviewListAdapter.ADD_FLICKR_PHOTO));
-
-        // Display the Flickr results list.
-        recyclerView = (RecyclerView) findViewById(R.id.flickr_preview_recycler_view);
-        int deviceOrientation = getResources().getConfiguration().orientation;
-        int numberOfColumns = deviceOrientation == Configuration.ORIENTATION_LANDSCAPE ? 3 : 2;
-        recyclerViewLayoutManager = new GridLayoutManager(this, numberOfColumns);
-        recyclerView.setLayoutManager(recyclerViewLayoutManager);
-        recyclerViewAdapter = new FlickrPreviewListAdapter(this, photos, downloadedPhotoIds, imageLoader);
-        recyclerView.setAdapter(recyclerViewAdapter);
-
-        // Get the intent for the query.
-        Intent intent = getIntent();
-        if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
+    private void processIntent(Intent intent) {
+        if (intent != null && Intent.ACTION_SEARCH.equals(intent.getAction())) {
             String query = intent.getStringExtra(SearchManager.QUERY);
 
             String titleFormat = getResources().getString(R.string.flickr_search_results_title);
@@ -210,6 +195,48 @@ public class FlickrSearchResultActivity extends AppCompatActivity {
                 Toast.makeText(FlickrSearchResultActivity.this, R.string.flickr_unsupported_encoding_error, Toast.LENGTH_SHORT).show();
             }
         }
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        processIntent(intent);
+    }
+
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_flickr_search_result);
+        queue = FlickrRequestQueue.getInstance(this).getRequestQueue();
+        imageLoader = FlickrRequestQueue.getInstance(this).getImageLoader();
+
+        if (savedInstanceState != null) {
+            downloadedPhotoIds = savedInstanceState.getStringArrayList(DOWNLOADED_PHOTO_IDS_KEY);
+        }
+        if (downloadedPhotoIds == null) {
+            downloadedPhotoIds = new ArrayList<>();
+        }
+
+        LocalBroadcastManager.getInstance(this).registerReceiver(addFlickrPhotoMessageReceiver, new IntentFilter(FlickrPreviewListAdapter.ADD_FLICKR_PHOTO));
+
+        // Hide the 'no results' message until loaded.
+        noFlickrResultsMessage = (LinearLayoutCompat) findViewById(R.id.no_flickr_results_message);
+        noFlickrResultsMessage.setVisibility(View.GONE);
+
+        // Spin the loading spinner until loaded.
+        loadingSpinner = (ProgressBar) findViewById(R.id.loading_spinner);
+        loadingSpinner.isIndeterminate();
+
+        // Display the Flickr results list.
+        recyclerView = (RecyclerView) findViewById(R.id.flickr_preview_recycler_view);
+        int deviceOrientation = getResources().getConfiguration().orientation;
+        int numberOfColumns = deviceOrientation == Configuration.ORIENTATION_LANDSCAPE ? 3 : 2;
+        recyclerViewLayoutManager = new GridLayoutManager(this, numberOfColumns);
+        recyclerView.setLayoutManager(recyclerViewLayoutManager);
+        recyclerViewAdapter = new FlickrPreviewListAdapter(this, photos, downloadedPhotoIds, imageLoader);
+        recyclerView.setAdapter(recyclerViewAdapter);
+
+        // Get the intent for the query.
+        Intent intent = getIntent();
+        processIntent(intent);
     }
 
     // Unregister from local async events.
