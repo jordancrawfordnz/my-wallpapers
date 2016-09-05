@@ -24,6 +24,7 @@ public class WallpaperListAdapter extends RecyclerView.Adapter<WallpaperListAdap
     public static final String SET_WALLPAPER_BROADCAST_INTENT = "set_wallpaper_message";
     public static final String DELETE_WALLPAPER_BROADCAST_INTENT = "delete_wallpaper_message";
     public static final String WALLPAPER_EXTRA = "wallpaper";
+    private static int MAX_DESCRIPTION_CHARACTERS = 200;
 
     public WallpaperListAdapter(Context context, ArrayList<Wallpaper> wallpapers) {
         this.context = context;
@@ -55,6 +56,7 @@ public class WallpaperListAdapter extends RecyclerView.Adapter<WallpaperListAdap
         private ImageView previewImageView;
         private ImageView wallpaperIsCurrentImageView;
         private TextView daysAsWallpaperView;
+        private TextView descriptionView;
         private Button deleteButton;
         private Button setButton;
 
@@ -67,6 +69,7 @@ public class WallpaperListAdapter extends RecyclerView.Adapter<WallpaperListAdap
             this.setButton = (Button) view.findViewById(R.id.wallpaper_card_set_button);
             this.deleteButton = (Button) view.findViewById(R.id.wallpaper_card_delete_button);
             this.wallpaperIsCurrentImageView = (ImageView) view.findViewById(R.id.wallpaper_is_current);
+            this.descriptionView = (TextView) view.findViewById(R.id.wallpaper_card_description);
         }
 
         public void setupView(final Wallpaper wallpaper) {
@@ -85,6 +88,21 @@ public class WallpaperListAdapter extends RecyclerView.Adapter<WallpaperListAdap
                     daysAsWallpaperText = String.format(format, actualDaysAsWallpaper);
             }
             daysAsWallpaperView.setText(daysAsWallpaperText);
+
+            if (wallpaper.getDescription() != null && wallpaper.getDescription().length() > 0) {
+                String descriptionToShow;
+                if (wallpaper.getDescription().length() > MAX_DESCRIPTION_CHARACTERS) {
+                    descriptionToShow = wallpaper.getDescription().substring(0, 200);
+                    descriptionToShow += "...";
+                } else {
+                    descriptionToShow = wallpaper.getDescription();
+                }
+                descriptionView.setText(descriptionToShow);
+                descriptionView.setVisibility(View.VISIBLE);
+            } else {
+                descriptionView.setText("");
+                descriptionView.setVisibility(View.GONE);
+            }
 
             // Show a check mark if the wallpaper is the current wallpaper.
             if (wallpaper.isCurrent()) {
