@@ -45,9 +45,10 @@ import java.util.ArrayList;
 /**
  * Loads and displays a Flickr search result.
  */
-public class FlickrSearchResultActivity extends AppCompatActivity {
+public class FlickrSearchResultActivity extends AppCompatActivity implements SearchView.OnQueryTextListener {
     private static final String API_KEY = "c4b0bc11e918734dd50f7f0eb21051a5";
     private static final String DOWNLOADED_PHOTO_IDS_KEY = "downloaded_photo_ids";
+    private static final String SEARCH_TEXT_KEY = "search_text";
     private ImageLoader imageLoader;
     private RequestQueue queue;
     private RecyclerView recyclerView;
@@ -57,6 +58,8 @@ public class FlickrSearchResultActivity extends AppCompatActivity {
     private ArrayList<String> downloadedPhotoIds;
     private LinearLayoutCompat noFlickrResultsMessage;
     private ProgressBar loadingSpinner;
+    private String searchText = "";
+    SearchView searchView;
 
     private BroadcastReceiver addFlickrPhotoMessageReceiver = new BroadcastReceiver() {
         @Override
@@ -116,90 +119,94 @@ public class FlickrSearchResultActivity extends AppCompatActivity {
 
         inflater.inflate(R.menu.flickr_search_activity_bar, menu);
         MenuItem searchItem = menu.findItem(R.id.flickr_action_search);
-        SearchView searchView = (SearchView) MenuItemCompat.getActionView(searchItem);
+        searchView = (SearchView) MenuItemCompat.getActionView(searchItem);
         SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
         searchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
+        searchView.setIconifiedByDefault(false);
+        searchView.setMaxWidth(Integer.MAX_VALUE);
+        searchView.setOnQueryTextListener(this);
+        if (searchText.length() > 0) {
+            searchView.setQuery(searchText, true);
+        }
 
         return super.onCreateOptionsMenu(menu);
     }
 
-    private void processIntent(Intent intent) {
-        if (intent != null && Intent.ACTION_SEARCH.equals(intent.getAction())) {
-            String query = intent.getStringExtra(SearchManager.QUERY);
+    @Override
+    public boolean onQueryTextSubmit(String query) {
+        getSupportActionBar().setDisplayShowTitleEnabled(false);
+        searchText = query;
+        searchView.clearFocus();
 
-            String titleFormat = getResources().getString(R.string.flickr_search_results_title);
-            String title = String.format(titleFormat, query);
-            getSupportActionBar().setTitle(title);
+        String encodedQuery = null;
+        try {
+            encodedQuery = URLEncoder.encode(query, "utf-8");
 
-            String encodedQuery = null;
-            try {
-                encodedQuery = URLEncoder.encode(query, "utf-8");
+            String requestUrl = "https://api.flickr.com/services/rest/?method=flickr.photos.search&extras=description&api_key=" + API_KEY + "&text=" + encodedQuery + "&format=json&nojsoncallback=1";
+            JsonObjectRequest searchRequest = new CachedJsonObjectRequest(Request.Method.GET, requestUrl, null, new Response.Listener<JSONObject>() {
+                @Override
+                public void onResponse(JSONObject response) {
+                    try {
+                        // Process the results into the photos list.
+                        photos.clear();
+                        JSONObject photosObject = response.getJSONObject("photos");
+                        JSONArray photoArray = photosObject.getJSONArray("photo");
+                        for (int photoIndex = 0; photoIndex < photoArray.length(); photoIndex++) {
+                            JSONObject photoObject = photoArray.getJSONObject(photoIndex);
+                            JSONObject descriptionObject = photoObject.getJSONObject("description");
 
-                String requestUrl = "https://api.flickr.com/services/rest/?method=flickr.photos.search&extras=description&api_key=" + API_KEY + "&text=" + encodedQuery + "&format=json&nojsoncallback=1";
-                JsonObjectRequest searchRequest = new CachedJsonObjectRequest(Request.Method.GET, requestUrl, null, new Response.Listener<JSONObject>() {
-                    @Override
-                    public void onResponse(JSONObject response) {
-                        try {
-                            // Process the results into the photos list.
-                            photos.clear();
-                            JSONObject photosObject = response.getJSONObject("photos");
-                            JSONArray photoArray = photosObject.getJSONArray("photo");
-                            for (int photoIndex = 0; photoIndex < photoArray.length(); photoIndex++) {
-                                JSONObject photoObject = photoArray.getJSONObject(photoIndex);
-                                JSONObject descriptionObject = photoObject.getJSONObject("description");
+                            // Populate the FlickrPhoto object.
+                            FlickrPhoto photo = new FlickrPhoto();
+                            photo.setId(photoObject.getString("id"));
+                            photo.setFarmId(photoObject.getString("farm"));
+                            photo.setSecret(photoObject.getString("secret"));
+                            photo.setServerId(photoObject.getString("server"));
 
-                                // Populate the FlickrPhoto object.
-                                FlickrPhoto photo = new FlickrPhoto();
-                                photo.setId(photoObject.getString("id"));
-                                photo.setFarmId(photoObject.getString("farm"));
-                                photo.setSecret(photoObject.getString("secret"));
-                                photo.setServerId(photoObject.getString("server"));
-
-                                // Strip HTML tags with Android.
-                                String description = Html.fromHtml(descriptionObject.getString("_content")).toString();
-                                if (description.length() > 0) {
-                                    photo.setDescription(description);
-                                }
-
-                                photos.add(photo);
+                            // Strip HTML tags with Android.
+                            String description = Html.fromHtml(descriptionObject.getString("_content")).toString();
+                            if (description.length() > 0) {
+                                photo.setDescription(description);
                             }
 
-                            // Hide the loading spinner and display the 'no results' message if needed.
-                            loadingSpinner.setVisibility(View.GONE);
-                            if (photos.size() == 0) {
-                                noFlickrResultsMessage.setVisibility(View.VISIBLE);
-                                recyclerView.setVisibility(View.GONE);
-                            } else {
-                                recyclerViewAdapter.notifyDataSetChanged();
-                                noFlickrResultsMessage.setVisibility(View.GONE);
-                                recyclerView.setVisibility(View.VISIBLE);
-                            }
-                        } catch (JSONException exception) {
-                            // Exception occurred while parsing the JSON, display an error.
-                            exception.printStackTrace();
-                            Toast.makeText(FlickrSearchResultActivity.this, R.string.flickr_json_exception, Toast.LENGTH_SHORT).show();
+                            photos.add(photo);
                         }
-                    }
-                }, new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        error.printStackTrace();
-                        Toast.makeText(FlickrSearchResultActivity.this, R.string.flickr_search_error, Toast.LENGTH_SHORT).show();
-                    }
-                });
 
-                // Start the request processing.
-                queue.add(searchRequest);
-            } catch (UnsupportedEncodingException exception) {
-                exception.printStackTrace();
-                Toast.makeText(FlickrSearchResultActivity.this, R.string.flickr_unsupported_encoding_error, Toast.LENGTH_SHORT).show();
-            }
+                        // Hide the loading spinner and display the 'no results' message if needed.
+                        loadingSpinner.setVisibility(View.GONE);
+                        if (photos.size() == 0) {
+                            noFlickrResultsMessage.setVisibility(View.VISIBLE);
+                            recyclerView.setVisibility(View.GONE);
+                        } else {
+                            recyclerViewAdapter.notifyDataSetChanged();
+                            noFlickrResultsMessage.setVisibility(View.GONE);
+                            recyclerView.setVisibility(View.VISIBLE);
+                        }
+                    } catch (JSONException exception) {
+                        // Exception occurred while parsing the JSON, display an error.
+                        exception.printStackTrace();
+                        Toast.makeText(FlickrSearchResultActivity.this, R.string.flickr_json_exception, Toast.LENGTH_SHORT).show();
+                    }
+                }
+            }, new Response.ErrorListener() {
+                @Override
+                public void onErrorResponse(VolleyError error) {
+                    error.printStackTrace();
+                    Toast.makeText(FlickrSearchResultActivity.this, R.string.flickr_search_error, Toast.LENGTH_SHORT).show();
+                }
+            });
+
+            // Start the request processing.
+            queue.add(searchRequest);
+        } catch (UnsupportedEncodingException exception) {
+            exception.printStackTrace();
+            Toast.makeText(FlickrSearchResultActivity.this, R.string.flickr_unsupported_encoding_error, Toast.LENGTH_SHORT).show();
         }
+        return true;
     }
 
     @Override
-    protected void onNewIntent(Intent intent) {
-        processIntent(intent);
+    public boolean onQueryTextChange(String newText) {
+        return true;
     }
 
     protected void onCreate(Bundle savedInstanceState) {
@@ -210,6 +217,7 @@ public class FlickrSearchResultActivity extends AppCompatActivity {
 
         if (savedInstanceState != null) {
             downloadedPhotoIds = savedInstanceState.getStringArrayList(DOWNLOADED_PHOTO_IDS_KEY);
+            searchText = savedInstanceState.getString(SEARCH_TEXT_KEY);
         }
         if (downloadedPhotoIds == null) {
             downloadedPhotoIds = new ArrayList<>();
@@ -233,10 +241,6 @@ public class FlickrSearchResultActivity extends AppCompatActivity {
         recyclerView.setLayoutManager(recyclerViewLayoutManager);
         recyclerViewAdapter = new FlickrPreviewListAdapter(this, photos, downloadedPhotoIds, imageLoader);
         recyclerView.setAdapter(recyclerViewAdapter);
-
-        // Get the intent for the query.
-        Intent intent = getIntent();
-        processIntent(intent);
     }
 
     // Unregister from local async events.
@@ -250,5 +254,6 @@ public class FlickrSearchResultActivity extends AppCompatActivity {
     @Override
     protected void onSaveInstanceState (Bundle outState) {
         outState.putStringArrayList(DOWNLOADED_PHOTO_IDS_KEY, downloadedPhotoIds);
+        outState.putString(SEARCH_TEXT_KEY, searchText);
     }
 }
