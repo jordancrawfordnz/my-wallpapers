@@ -215,7 +215,7 @@ public class MainActivity extends AppCompatActivity {
                 startActivityForResult(Intent.createChooser(intent, getString(R.string.pick_image_message)), PICK_IMAGE_REQUEST);
                 return true;
             }
-            case R.id.action_search: {
+            case R.id.action_add_flickr: {
                 // Open the Flickr search activity.
                 Intent intent = new Intent(this, FlickrSearchResultActivity.class);
                 startActivity(intent);

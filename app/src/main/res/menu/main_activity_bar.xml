@@ -5,8 +5,14 @@
     tools:context="kiwi.jordancrawford.mywallpapers.MainActivity">
 
     <item android:id="@+id/action_search"
-        android:title="@string/menu_item_add_from_search"
+        android:title="@string/menu_item_search_wallpapers"
         android:icon="@drawable/ic_magnify_white_24dp"
+        app:showAsAction="always"
+        app:actionViewClass="android.support.v7.widget.SearchView"/>
+
+    <item android:id="@+id/action_add_flickr"
+        android:title="@string/menu_item_add_from_flickr"
+        android:icon="@drawable/ic_flickr"
         app:showAsAction="always"/>
 
     <item android:id="@+id/action_add_local"

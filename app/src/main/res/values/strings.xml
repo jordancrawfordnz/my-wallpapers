@@ -11,7 +11,8 @@
     <string name="wallpaper_delete_confirm_delete_button">Yes, delete it</string>
     <string name="wallpaper_delete_confirm_cancel_button">No</string>
     <string name="menu_item_add_from_device">Add from device</string>
-    <string name="menu_item_add_from_search">Search Flickr</string>
+    <string name="menu_item_add_from_flickr">Add from Flickr</string>
+    <string name="menu_item_search_flickr">Search Flickr</string>
     <string name="pick_image_message">Add a wallpaper from your device</string>
     <string name="flickr_search_label">Search Flickr</string>
     <string name="flickr_search_hint">Search Flickr for a wallpaper</string>
@@ -37,4 +38,5 @@
     <string name="wallpaper_change_description_dialog_title">Change description</string>
     <string name="wallpaper_change_description_dialog_set_button_text">Set</string>
     <string name="wallpaper_change_description_dialog_cancel_button_text">Cancel</string>
+    <string name="menu_item_search_wallpapers">Search wallpapers</string>
 </resources>
