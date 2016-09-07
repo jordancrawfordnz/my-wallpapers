@@ -12,6 +12,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.BoolRes;
 import android.support.v4.content.LocalBroadcastManager;
+import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
@@ -43,6 +44,7 @@ public class MainActivity extends AppCompatActivity {
     private RecyclerView.LayoutManager wallpaperRecyclerViewLayoutManager;
     private RecyclerView.Adapter wallpaperRecyclerViewAdapter;
     private LinearLayoutCompat noWallpapersMessage;
+    private SearchView searchView;
 
     private BroadcastReceiver wallpaperAddedMessageReceiver = new BroadcastReceiver() {
         @Override
@@ -199,6 +201,10 @@ public class MainActivity extends AppCompatActivity {
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.main_activity_bar, menu);
+        MenuItem searchItem = menu.findItem(R.id.action_search);
+        searchView = (SearchView) MenuItemCompat.getActionView(searchItem);
+        SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
+        searchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
 
         return super.onCreateOptionsMenu(menu);
     }

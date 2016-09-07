@@ -39,4 +39,6 @@
     <string name="wallpaper_change_description_dialog_set_button_text">Set</string>
     <string name="wallpaper_change_description_dialog_cancel_button_text">Cancel</string>
     <string name="menu_item_search_wallpapers">Search wallpapers</string>
+    <string name="wallpaper_search_label">Search My Wallpapers.</string>
+    <string name="wallpaper_search_hint">Search My Wallpapers.</string>
 </resources>
