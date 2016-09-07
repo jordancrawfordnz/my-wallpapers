@@ -45,6 +45,33 @@
 
     </android.support.v7.widget.LinearLayoutCompat>
 
+    <android.support.v7.widget.LinearLayoutCompat
+        android:id="@+id/flickr_search_suggestion_message"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
+        android:orientation="vertical"
+        android:layout_centerHorizontal="true">
+
+        <android.support.v7.widget.AppCompatTextView
+            android:layout_centerVertical="true"
+            android:layout_centerHorizontal="true"
+            android:text="@string/flickr_search_suggestion_message"
+            android:textSize="@dimen/flickr_search_suggestion_text_size"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+
+        <android.support.v7.widget.AppCompatTextView
+            android:layout_centerVertical="true"
+            android:layout_centerHorizontal="true"
+            android:width="@dimen/flickr_search_suggestion_explainer_width"
+            android:textSize="@dimen/flickr_search_suggestion_explainer_text_size"
+            android:text="@string/flickr_search_suggestion_explainer"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+
+    </android.support.v7.widget.LinearLayoutCompat>
+
     <android.support.v7.widget.RecyclerView
         android:id="@+id/flickr_preview_recycler_view"
         android:scrollbars="vertical"

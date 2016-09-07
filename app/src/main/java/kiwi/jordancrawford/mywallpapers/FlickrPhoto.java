@@ -40,7 +40,7 @@ public class FlickrPhoto implements Parcelable {
 
     // Gets the URL of the large image. This is the size that is kept to be used when the user sets the wallpaper.
     public String getLargeUrl() {
-        return getBaseUrl() + "_h.jpg";
+        return getBaseUrl() + "_b.jpg";
     }
 
     public String getId() {

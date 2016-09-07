@@ -28,11 +28,7 @@ import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.ImageLoader;
-import com.android.volley.toolbox.JsonArrayRequest;
 import com.android.volley.toolbox.JsonObjectRequest;
-import com.android.volley.toolbox.NetworkImageView;
-import com.android.volley.toolbox.StringRequest;
-import com.android.volley.toolbox.Volley;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -57,6 +53,7 @@ public class FlickrSearchResultActivity extends AppCompatActivity implements Sea
     private ArrayList<FlickrPhoto> photos = new ArrayList<>();
     private ArrayList<String> downloadedPhotoIds;
     private LinearLayoutCompat noFlickrResultsMessage;
+    private LinearLayoutCompat flickrSearchSuggestionMessage;
     private ProgressBar loadingSpinner;
     private String searchText = "";
     SearchView searchView;
@@ -138,10 +135,15 @@ public class FlickrSearchResultActivity extends AppCompatActivity implements Sea
         searchText = query;
         searchView.clearFocus();
 
+        // Show the loading spinner.
+        loadingSpinner.setVisibility(View.VISIBLE);
+        flickrSearchSuggestionMessage.setVisibility(View.GONE);
+        noFlickrResultsMessage.setVisibility(View.GONE);
+        recyclerView.setVisibility(View.GONE);
+
         String encodedQuery = null;
         try {
             encodedQuery = URLEncoder.encode(query, "utf-8");
-
             String requestUrl = "https://api.flickr.com/services/rest/?method=flickr.photos.search&extras=description&api_key=" + API_KEY + "&text=" + encodedQuery + "&format=json&nojsoncallback=1";
             JsonObjectRequest searchRequest = new CachedJsonObjectRequest(Request.Method.GET, requestUrl, null, new Response.Listener<JSONObject>() {
                 @Override
@@ -232,6 +234,11 @@ public class FlickrSearchResultActivity extends AppCompatActivity implements Sea
         // Spin the loading spinner until loaded.
         loadingSpinner = (ProgressBar) findViewById(R.id.loading_spinner);
         loadingSpinner.isIndeterminate();
+        loadingSpinner.setVisibility(View.GONE);
+
+        // Setup the Flickr search suggestion.
+        flickrSearchSuggestionMessage = (LinearLayoutCompat) findViewById(R.id.flickr_search_suggestion_message);
+        flickrSearchSuggestionMessage.setVisibility(View.VISIBLE);
 
         // Display the Flickr results list.
         recyclerView = (RecyclerView) findViewById(R.id.flickr_preview_recycler_view);

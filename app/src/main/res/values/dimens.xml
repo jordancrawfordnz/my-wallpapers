@@ -29,4 +29,7 @@
     <dimen name="flickr_preview_no_flickr_results_text_size">30sp</dimen>
     <dimen name="flickr_preview_no_flickr_results_explainer_width">300dp</dimen>
     <dimen name="flickr_preview_no_flickr_results_explainer_text_size">20sp</dimen>
+    <dimen name="flickr_search_suggestion_text_size">30sp</dimen>
+    <dimen name="flickr_search_suggestion_explainer_width">300dp</dimen>
+    <dimen name="flickr_search_suggestion_explainer_text_size">20sp</dimen>
 </resources>
