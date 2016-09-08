@@ -71,8 +71,11 @@ public class WallpaperDbHelper extends SQLiteOpenHelper {
         onCreate(db);
     }
 
-    // Gets all the wallpapers, with the most commonly used on top.
-    public ArrayList<Wallpaper> getAllWallpapers() {
+    // Gets wallpapers that match the provided description search query.
+    public ArrayList<Wallpaper> searchForWallpaper(String descriptionSearchQuery) {
+        if (descriptionSearchQuery == null) {
+            // TODO:
+        }
         String[] projection = {
                 WallpaperEntry._ID,
                 WallpaperEntry.DAYS_AS_WALLPAPER_COLUMN_NAME,
@@ -102,6 +105,11 @@ public class WallpaperDbHelper extends SQLiteOpenHelper {
         }
         queryResult.close();
         return wallpaperResult;
+    }
+
+    // Gets all the wallpapers, with the most commonly used on top.
+    public ArrayList<Wallpaper> getAllWallpapers() {
+        return searchForWallpaper(null);
     }
 
     // Adds a wallpaper.

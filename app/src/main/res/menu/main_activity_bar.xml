@@ -1,8 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    tools:context="kiwi.jordancrawford.mywallpapers.MainActivity">
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <item android:id="@+id/action_search"
         android:title="@string/menu_item_search_wallpapers"
