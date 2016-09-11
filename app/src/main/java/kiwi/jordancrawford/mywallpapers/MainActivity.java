@@ -10,19 +10,19 @@ import android.content.IntentFilter;
 import android.content.res.Configuration;
 import android.net.Uri;
 import android.os.Bundle;
-import android.support.annotation.BoolRes;
 import android.support.v4.content.LocalBroadcastManager;
-import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
+import android.text.TextUtils;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.support.v7.widget.LinearLayoutCompat;
+import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
 import android.widget.Toast;
 import java.util.ArrayList;
@@ -30,12 +30,13 @@ import java.util.ArrayList;
 /**
  * Displays the list of wallpapers and provides options to add new wallpapers, set, and delete wallpapers.
  */
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements SearchView.OnQueryTextListener {
     private final int PICK_IMAGE_REQUEST = 1;
     private final int SET_WALLPAPER_REQUEST = 2;
     private final String INTENT_USED_KEY = "used";
     private final String NEW_CURRENT_WALLPAPER_KEY = "new_current_wallpaper";
     private final String CURRENT_WALLPAPER_KEY = "current_wallpaper";
+    private final String SEARCH_TEXT_KEY = "search_text";
 
     private ArrayList<Wallpaper> wallpapers = new ArrayList<>();
     private Wallpaper currentWallpaper = null;
@@ -45,25 +46,26 @@ public class MainActivity extends AppCompatActivity {
     private RecyclerView.Adapter wallpaperRecyclerViewAdapter;
     private LinearLayoutCompat noWallpapersMessage;
     private SearchView searchView;
+    private String searchText;
 
     private BroadcastReceiver wallpaperAddedMessageReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            loadAllWallpapers();
+            loadWallpapers();
         }
     };
 
     private BroadcastReceiver wallpaperUpdateCompleteReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            loadAllWallpapers();
+            loadWallpapers();
         }
     };
 
     private BroadcastReceiver wallpaperDownloadedMessageReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            loadAllWallpapers();
+            loadWallpapers();
         }
     };
 
@@ -100,8 +102,8 @@ public class MainActivity extends AppCompatActivity {
     private BroadcastReceiver getAllWallpaperMessageReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            ArrayList<Wallpaper> updatedWallpapers = intent.getParcelableArrayListExtra(GetAllWallpapersTask.ALL_WALLPAPERS_EXTRA);
-            currentWallpaper = intent.getParcelableExtra(GetAllWallpapersTask.CURRENT_WALLPAPER_EXTRA);
+            ArrayList<Wallpaper> updatedWallpapers = intent.getParcelableArrayListExtra(GetWallpapersTask.WALLPAPERS_EXTRA);
+            currentWallpaper = intent.getParcelableExtra(GetWallpapersTask.CURRENT_WALLPAPER_EXTRA);
 
             // Update the list of wallpapers.
             wallpapers.clear();
@@ -164,7 +166,7 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void onReceive(Context context, Intent intent) {
             // Reload the wallpapers to exclude the deleted wallpaper.
-            loadAllWallpapers();
+            loadWallpapers();
         }
     };
 
@@ -172,14 +174,14 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void onReceive(Context context, Intent intent) {
             // Reload the wallpapers to update the newly set wallpaper.
-            loadAllWallpapers();
+            loadWallpapers();
             Toast.makeText(context, R.string.wallpaper_set, Toast.LENGTH_SHORT).show();
         }
     };
 
-    // Starts the GetAllWallpapersTask task.
-    private void loadAllWallpapers() {
-        new GetAllWallpapersTask(this).execute();
+    // Starts the GetWallpapersTask task.
+    private void loadWallpapers() {
+        new GetWallpapersTask(this).execute(searchText);
     }
 
     private void processIntent(Intent intent) {
@@ -194,6 +196,8 @@ public class MainActivity extends AppCompatActivity {
                 new ProcessSentImageTask(this).execute(imageUri);
             }
         }
+        // Show all wallpapers.
+        loadWallpapers();
     }
 
     // Inflate the action bar menu's options.
@@ -202,8 +206,28 @@ public class MainActivity extends AppCompatActivity {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.main_activity_bar, menu);
         SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
-        searchView = (SearchView) menu.findItem(R.id.action_search).getActionView();
+        MenuItem searchMenuItem = menu.findItem(R.id.action_search);
+
+        // Expand the search view again if a search query was provided.
+        if (!TextUtils.isEmpty(searchText)) {
+            searchMenuItem.expandActionView();
+        }
+
+        searchView = (SearchView) searchMenuItem.getActionView();
         searchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
+
+        // Don't use the full screen keyboard by setting the IME options.
+            // Get the current IME options to OR with.
+        int options = searchView.getImeOptions();
+        searchView.setImeOptions(options|EditorInfo.IME_FLAG_NO_EXTRACT_UI);
+
+        searchView.setOnQueryTextListener(this);
+
+        // Fill in the search field if a search query was provided.
+        if (!TextUtils.isEmpty(searchText)) {
+            searchView.setQuery(searchText, false);
+            searchView.clearFocus();
+        }
 
         return super.onCreateOptionsMenu(menu);
     }
@@ -254,11 +278,12 @@ public class MainActivity extends AppCompatActivity {
         if (savedInstanceState != null) {
             newCurrentWallpaper = savedInstanceState.getParcelable(NEW_CURRENT_WALLPAPER_KEY);
             currentWallpaper = savedInstanceState.getParcelable(CURRENT_WALLPAPER_KEY);
+            searchText = savedInstanceState.getString(SEARCH_TEXT_KEY);
         }
 
         // Setup broadcast listeners. Broadcasts are used to deal with async tasks and menu options. These are important because the activity instance could be re-created at any time.
         LocalBroadcastManager.getInstance(this).registerReceiver(wallpaperAddedMessageReceiver, new IntentFilter(ProcessSentImageTask.WALLPAPER_ADDED_BROADCAST_INTENT));
-        LocalBroadcastManager.getInstance(this).registerReceiver(getAllWallpaperMessageReceiver, new IntentFilter(GetAllWallpapersTask.GET_ALL_WALLPAPERS_BROADCAST_INTENT));
+        LocalBroadcastManager.getInstance(this).registerReceiver(getAllWallpaperMessageReceiver, new IntentFilter(GetWallpapersTask.GET_WALLPAPERS_BROADCAST_INTENT));
         LocalBroadcastManager.getInstance(this).registerReceiver(setWallpaperMessageReceiver, new IntentFilter(WallpaperListAdapter.SET_WALLPAPER_BROADCAST_INTENT));
         LocalBroadcastManager.getInstance(this).registerReceiver(deleteWallpaperMessageReceiver, new IntentFilter(WallpaperListAdapter.DELETE_WALLPAPER_BROADCAST_INTENT));
         LocalBroadcastManager.getInstance(this).registerReceiver(wallpaperDeletedMessageReceiver, new IntentFilter(DeleteWallpaperTask.WALLPAPER_DELETED_BROADCAST_INTENT));
@@ -268,7 +293,6 @@ public class MainActivity extends AppCompatActivity {
         LocalBroadcastManager.getInstance(this).registerReceiver(wallpaperUpdateCompleteReceiver, new IntentFilter(UpdateWallpaperTask.WALLPAPER_UPDATE_COMPLETE_BROADCAST_INTENT));
 
         processIntent(getIntent());
-        loadAllWallpapers();
 
         // Setup the wallpaper recycler view.
         wallpaperRecyclerView = (RecyclerView) findViewById(R.id.wallpaper_list_recycler_view);
@@ -315,6 +339,25 @@ public class MainActivity extends AppCompatActivity {
         // Save the newCurrentWallpaper and currentWallpaper.
         outState.putParcelable(NEW_CURRENT_WALLPAPER_KEY, newCurrentWallpaper);
         outState.putParcelable(CURRENT_WALLPAPER_KEY, currentWallpaper);
+        outState.putString(SEARCH_TEXT_KEY, searchText);
     }
 
+    // Do nothing on text submit.
+    @Override
+    public boolean onQueryTextSubmit(String query) {
+        return true;
+    }
+
+    // Search Wallpapers as the user types.
+    @Override
+    public boolean onQueryTextChange(String newText) {
+        if (newText.length() == 0) {
+            searchText = null;
+        } else {
+            searchText = newText;
+        }
+        loadWallpapers();
+
+        return true;
+    }
 }
